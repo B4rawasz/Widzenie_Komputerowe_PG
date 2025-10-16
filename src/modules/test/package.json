@@ -1,0 +1,6 @@
+{
+	"name": "@widzenie_komputerowe_pg/test",
+	"version": "1.0.0",
+	"private": true,
+	"main": "test.tsx"
+}
