@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import QRCode from "react-qr-code";
+
 export default function Test() {
-	return <div>Test module</div>;
+	return <QRCode value="https://example.com" />;
 }
