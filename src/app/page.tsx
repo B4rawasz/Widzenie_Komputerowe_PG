@@ -6,20 +6,20 @@ export default function Home() {
 	return (
 		<>
 			<section className="flex flex-col items-center justify-center gap-6 p-8">
-				<div className="flex flex-col items-center gap-8 text-center w-220 my-48">
-					<h1 className="text-6xl h-33 font-bold text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
+				<div className="flex flex-col items-center gap-8 text-center md:w-220 w-full md:my-48 my-24">
+					<h1 className="md:text-6xl text-4xl md:h-33 h-fit font-bold text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
 						Odkryj kod, <br />
 						który uczy maszyny widzieć
 					</h1>
-					<span className="text-2xl w-2/3 text-muted-foreground">
+					<span className="md:text-2xl text-lg w-2/3 text-muted-foreground">
 						Zobacz pełną ścieżkę wizualną, od surowego piksela do predykcji, z pełną kontrolą nad każdym etapem.
 					</span>
 				</div>
 			</section>
-			<section className="flex flex-col items-center justify-center gap-6 p-8">
-				<h2 className="text-4xl font-bold">Wprowadzenie do Computer Vision</h2>
-				<h3 className="text-xl text-muted-foreground">Jak maszyny naprawdę "widzą"?</h3>
-				<div className="flex flex-col items-center justify-center gap-6 w-1/2 text-lg">
+			<section className="flex flex-col items-center justify-center gap-6 md:p-8 p-4">
+				<h2 className="md:text-4xl text-3xl font-bold text-center">Wprowadzenie do Computer Vision</h2>
+				<h3 className="md:text-xl text-lg text-muted-foreground">Jak maszyny naprawdę "widzą"?</h3>
+				<div className="flex flex-col items-center justify-center gap-6 md:w-1/2 w-5/6 text-lg">
 					<span>
 						Computer Vision to nie magia, to zaawansowana dziedzina Sztucznej Inteligencji, która uczy algorytmy
 						interpretowania i rozumienia obrazów cyfrowych oraz strumieni wideo.
@@ -50,9 +50,9 @@ export default function Home() {
 					</span>
 				</div>
 			</section>
-			<section className="flex flex-col items-center justify-center gap-12 p-8 mt-32">
+			<section className="flex flex-col items-center justify-center gap-12 p-8 md:mt-32 mt-16">
 				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="w-1/6 flex flex-col items-start justify-center gap-4">
+					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
 						<h3 className="text-2xl font-bold mb-4">Fundamenty Przetwarzania Obrazu</h3>
 						<span>
 							Zanim model AI zrozumie, co jest na obrazie, musi go "zobaczyć" na najbardziej podstawowym, matematycznym
@@ -74,7 +74,7 @@ export default function Home() {
 						alt="placeholder"
 						width={400}
 						height={600}
-						className="w-1/6 h-auto rounded-2xl"
+						className="w-1/6 h-auto rounded-2xl md:block hidden"
 					/>
 				</section>
 				<section className="flex flex-row items-center justify-center w-full gap-6">
@@ -83,9 +83,9 @@ export default function Home() {
 						alt="placeholder"
 						width={400}
 						height={600}
-						className="w-1/6 h-auto rounded-2xl"
+						className="w-1/6 h-auto rounded-2xl md:block hidden"
 					/>
-					<div className="w-1/6 flex flex-col items-start justify-center gap-4">
+					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
 						<h3 className="text-2xl font-bold mb-4">Podstawowe Zadania CV</h3>
 						<span>Przechodzimy do rdzenia Computer Vision: Klasyfikacji i Detekcji.</span>
 						<span>
@@ -101,7 +101,7 @@ export default function Home() {
 					</div>
 				</section>
 				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="w-1/6 flex flex-col items-start justify-center gap-4">
+					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
 						<h3 className="text-2xl font-bold mb-4">Przejście do Precyzji i Lokalizacji</h3>
 						<span>
 							Detekcja za pomocą ramek to za mało. Ta sekcja pokazuje, jak Computer Vision osiąga precyzję na poziomie
@@ -122,7 +122,7 @@ export default function Home() {
 						alt="placeholder"
 						width={400}
 						height={600}
-						className="w-1/6 h-auto rounded-2xl"
+						className="w-1/6 h-auto rounded-2xl md:block hidden"
 					/>
 				</section>
 				<section className="flex flex-row items-center justify-center w-full gap-6">
@@ -131,9 +131,9 @@ export default function Home() {
 						alt="placeholder"
 						width={400}
 						height={600}
-						className="w-1/6 h-auto rounded-2xl"
+						className="w-1/6 h-auto rounded-2xl md:block hidden"
 					/>
-					<div className="w-1/6 flex flex-col items-start justify-center gap-4">
+					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
 						<h3 className="text-2xl font-bold mb-4">Analiza Modelu i Interpretacja</h3>
 						<span>
 							To sekcja Głębokiej Analizy. Zrozumienie, jak działa model, jest ważne, ale kluczowe jest zrozumienie,
@@ -151,7 +151,7 @@ export default function Home() {
 					</div>
 				</section>
 				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="w-1/6 flex flex-col items-start justify-center gap-4">
+					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
 						<h3 className="text-2xl font-bold mb-4">Zastosowania Zaawansowane i Kontekst</h3>
 						<span>
 							Ostatnia sekcja łączy nabyte umiejętności w celu rozwiązania złożonych problemów z świata rzeczywistego.
@@ -170,7 +170,7 @@ export default function Home() {
 						alt="placeholder"
 						width={400}
 						height={600}
-						className="w-1/6 h-auto rounded-2xl"
+						className="w-1/6 h-auto rounded-2xl md:block hidden"
 					/>
 				</section>
 			</section>
