@@ -51,9 +51,9 @@ export default function Home() {
 				</div>
 			</section>
 			<section className="flex flex-col items-center justify-center gap-12 p-8 md:mt-32 mt-16">
-				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
-						<h3 className="text-2xl font-bold mb-4">Fundamenty Przetwarzania Obrazu</h3>
+				<Section>
+					<SectionContent>
+						<SectionTitle>Fundamenty Przetwarzania Obrazu</SectionTitle>
 						<span>
 							Zanim model AI zrozumie, co jest na obrazie, musi go "zobaczyć" na najbardziej podstawowym, matematycznym
 							poziomie.
@@ -63,30 +63,14 @@ export default function Home() {
 							jako macierze pikseli i jak proste, lecz potężne operacje matematyczne wydobywają z nich fundamentalne
 							cechy (krawędzie, tekstury).
 						</span>
-						<div className="flex flex-wrap gap-2">
-							<Badge variant="secondary">Kernel</Badge>
-							<Badge variant="secondary">Wykrywanie krawędzi</Badge>
-							<Badge variant="secondary">Pismo ręczne</Badge>
-						</div>
-					</div>
-					<Image
-						src={"https://placehold.co/400x600.png"}
-						alt="placeholder"
-						width={400}
-						height={600}
-						className="w-1/6 h-auto rounded-2xl md:block hidden"
-					/>
-				</section>
-				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<Image
-						src={"https://placehold.co/400x600.png"}
-						alt="placeholder"
-						width={400}
-						height={600}
-						className="w-1/6 h-auto rounded-2xl md:block hidden"
-					/>
-					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
-						<h3 className="text-2xl font-bold mb-4">Podstawowe Zadania CV</h3>
+						<SectionBadges items={["Kernel", "Wykrywanie krawędzi", "Pismo ręczne"]} />
+					</SectionContent>
+					<SectionImage src={"https://placehold.co/400x600.png"} />
+				</Section>
+
+				<Section reverse>
+					<SectionContent>
+						<SectionTitle>Podstawowe Zadania CV</SectionTitle>
 						<span>Przechodzimy do rdzenia Computer Vision: Klasyfikacji i Detekcji.</span>
 						<span>
 							Nauczysz się kluczowej różnicy między pytaniem Co to jest? (Klasyfikacja) a pytaniem Gdzie to jest?
@@ -94,15 +78,14 @@ export default function Home() {
 							precyzyjną ramkę (Bounding Box), aby zlokalizować obiekt w przestrzeni. To fundamenty algorytmów takich
 							jak YOLO i ResNet.
 						</span>
-						<div className="flex flex-wrap gap-2">
-							<Badge variant="secondary">Klasyfikacja</Badge>
-							<Badge variant="secondary">Detekcja</Badge>
-						</div>
-					</div>
-				</section>
-				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
-						<h3 className="text-2xl font-bold mb-4">Przejście do Precyzji i Lokalizacji</h3>
+						<SectionBadges items={["Klasyfikacja", "Detekcja"]} />
+					</SectionContent>
+					<SectionImage src={"https://placehold.co/400x600.png"} />
+				</Section>
+
+				<Section>
+					<SectionContent>
+						<SectionTitle>Przejście do Precyzji i Lokalizacji</SectionTitle>
 						<span>
 							Detekcja za pomocą ramek to za mało. Ta sekcja pokazuje, jak Computer Vision osiąga precyzję na poziomie
 							piksela dzięki Segmentacji.
@@ -112,29 +95,14 @@ export default function Home() {
 							(rozróżnianie wielu instancji tego samego obiektu). Moduły te są sercem trybu portretowego w smartfonach i
 							zaawansowanej diagnostyki medycznej.
 						</span>
-						<div className="flex flex-wrap gap-2">
-							<Badge variant="secondary">Segmentację Semantyczną</Badge>
-							<Badge variant="secondary">Segmentacja Instancyjna</Badge>
-						</div>
-					</div>
-					<Image
-						src={"https://placehold.co/400x600.png"}
-						alt="placeholder"
-						width={400}
-						height={600}
-						className="w-1/6 h-auto rounded-2xl md:block hidden"
-					/>
-				</section>
-				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<Image
-						src={"https://placehold.co/400x600.png"}
-						alt="placeholder"
-						width={400}
-						height={600}
-						className="w-1/6 h-auto rounded-2xl md:block hidden"
-					/>
-					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
-						<h3 className="text-2xl font-bold mb-4">Analiza Modelu i Interpretacja</h3>
+						<SectionBadges items={["Segmentacja Semantyczna", "Segmentacja Instancyjna"]} />
+					</SectionContent>
+					<SectionImage src={"https://placehold.co/400x600.png"} />
+				</Section>
+
+				<Section reverse>
+					<SectionContent>
+						<SectionTitle>Analiza Modelu i Interpretacja</SectionTitle>
 						<span>
 							To sekcja Głębokiej Analizy. Zrozumienie, jak działa model, jest ważne, ale kluczowe jest zrozumienie,
 							dlaczego podejmuje on takie, a nie inne decyzje oraz jak optymalizować jego wyniki.
@@ -143,37 +111,88 @@ export default function Home() {
 							Dzięki interaktywnym narzędziom przejmiesz kontrolę nad kluczowymi parametrami post-processingowymi
 							(takimi jak NMS i IOU) oraz nauczysz się interpretować surowe wyniki probabilistyczne (Softmax) modelu.
 						</span>
-						<div className="flex flex-wrap gap-2">
-							<Badge variant="secondary">Wektor Prawdopodobieństwa</Badge>
-							<Badge variant="secondary">Softmax</Badge>
-							<Badge variant="secondary">Ocena Lokalizacji</Badge>
-						</div>
-					</div>
-				</section>
-				<section className="flex flex-row items-center justify-center w-full gap-6">
-					<div className="md:w-1/6 flex flex-col items-start justify-center gap-4">
-						<h3 className="text-2xl font-bold mb-4">Zastosowania Zaawansowane i Kontekst</h3>
+						<SectionBadges items={["Wektor Prawdopodobieństwa", "Softmax", "Ocena Lokalizacji"]} />
+					</SectionContent>
+					<SectionImage src={"https://placehold.co/400x600.png"} />
+				</Section>
+
+				<Section>
+					<SectionContent>
+						<SectionTitle>Zastosowania Zaawansowane i Kontekst</SectionTitle>
 						<span>
 							Ostatnia sekcja łączy nabyte umiejętności w celu rozwiązania złożonych problemów z świata rzeczywistego.
 							Od Estymacji Pozy (analiza geometrii i ruchu ciała) po Generowanie Opisów Obrazów (integracja CV z
-							Przetwarzaniem Języka Naturalnego – NLP).
+							Przetwarzaniem Języka Naturalnego - NLP).
 						</span>
 						<span>Zobaczysz, jak różne gałęzie AI współpracują, by tworzyć zaawansowane aplikacje.</span>
-						<div className="flex flex-wrap gap-2">
-							<Badge variant="secondary">Analiza Geometrii Ciała</Badge>
-							<Badge variant="secondary">Generowanie Opisów</Badge>
-							<Badge variant="secondary">Heatmap</Badge>
-						</div>
-					</div>
-					<Image
-						src={"https://placehold.co/400x600.png"}
-						alt="placeholder"
-						width={400}
-						height={600}
-						className="w-1/6 h-auto rounded-2xl md:block hidden"
-					/>
-				</section>
+						<SectionBadges items={["Analiza Geometrii Ciała", "Generowanie Opisów", "Heatmap"]} />
+					</SectionContent>
+					<SectionImage src={"https://placehold.co/400x600.png"} />
+				</Section>
 			</section>
 		</>
+	);
+}
+
+type SectionRootProps = React.PropsWithChildren<{
+	reverse?: boolean;
+	className?: string;
+}>;
+
+export function Section({ children, reverse = false, className = "", ...props }: SectionRootProps) {
+	return (
+		<section
+			className={`flex items-center justify-center w-full gap-6 ${
+				reverse ? "flex-row-reverse" : "flex-row"
+			} ${className}`}
+			{...props}
+		>
+			{children}
+		</section>
+	);
+}
+
+export function SectionTitle({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
+	return <h3 className={`text-2xl font-bold mb-4 ${className}`}>{children}</h3>;
+}
+
+export function SectionContent({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
+	return <div className={`md:w-1/6 flex flex-col items-start justify-center gap-4 ${className}`}>{children}</div>;
+}
+
+export function SectionBadges({ items = [] }: { items?: string[] }) {
+	if (!items || items.length === 0) return null;
+	return (
+		<div className="flex flex-wrap gap-2 mt-2">
+			{items.map((b) => (
+				<Badge key={b} variant="secondary">
+					{b}
+				</Badge>
+			))}
+		</div>
+	);
+}
+
+export function SectionImage({
+	src,
+	alt = "section image",
+	width = 400,
+	height = 600,
+	className = "",
+}: {
+	src: string;
+	alt?: string;
+	width?: number;
+	height?: number;
+	className?: string;
+}) {
+	return (
+		<Image
+			src={src}
+			alt={alt}
+			width={width}
+			height={height}
+			className={`w-1/6 h-auto rounded-2xl md:block hidden ${className}`}
+		/>
 	);
 }
