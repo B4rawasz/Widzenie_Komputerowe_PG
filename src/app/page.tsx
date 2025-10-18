@@ -6,20 +6,20 @@ export default function Home() {
 	return (
 		<>
 			<section className="flex flex-col items-center justify-center gap-6 p-8">
-				<div className="flex flex-col items-center gap-8 text-center md:w-220 w-full md:my-48 my-24">
-					<h1 className="md:text-6xl text-4xl md:h-33 h-fit font-bold text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
+				<div className="flex flex-col items-center gap-8 text-center lg:w-220 w-full md:my-48 my-24">
+					<h1 className="lg:text-6xl text-4xl lg:h-33 h-fit font-bold text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
 						Odkryj kod, <br />
 						który uczy maszyny widzieć
 					</h1>
-					<span className="md:text-2xl text-lg w-2/3 text-muted-foreground">
+					<span className="lg:text-2xl text-lg w-2/3 text-muted-foreground">
 						Zobacz pełną ścieżkę wizualną, od surowego piksela do predykcji, z pełną kontrolą nad każdym etapem.
 					</span>
 				</div>
 			</section>
-			<section className="flex flex-col items-center justify-center gap-6 md:p-8 p-4">
-				<h2 className="md:text-4xl text-3xl font-bold text-center">Wprowadzenie do Computer Vision</h2>
-				<h3 className="md:text-xl text-lg text-muted-foreground">Jak maszyny naprawdę "widzą"?</h3>
-				<div className="flex flex-col items-center justify-center gap-6 md:w-1/2 w-5/6 text-lg">
+			<section className="flex flex-col items-center justify-center gap-6 lg:p-8 p-4">
+				<h2 className="lg:text-4xl text-3xl font-bold text-center">Wprowadzenie do Computer Vision</h2>
+				<h3 className="lg:text-xl text-lg text-muted-foreground">Jak maszyny naprawdę "widzą"?</h3>
+				<div className="flex flex-col items-center justify-center gap-6 xl:w-1/2 lg:w-2/3 w-5/6 text-lg">
 					<span>
 						Computer Vision to nie magia, to zaawansowana dziedzina Sztucznej Inteligencji, która uczy algorytmy
 						interpretowania i rozumienia obrazów cyfrowych oraz strumieni wideo.
@@ -44,13 +44,13 @@ export default function Home() {
 						</li>
 					</ul>
 					<span>
-						<span className="font-bold">Computer Vision PG</span> to Twoje interaktywne laboratorium, gdzie możesz
-						zobaczyć algorytmy w akcji, zrozumieć ich logikę i poznać kluczowe mechanizmy CV, które napędzają
-						autonomiczne pojazdy, medycynę, robotykę i zmieniają sposób, w jaki żyjemy.
+						<span className="font-bold">CVision</span> to Twoje interaktywne laboratorium, gdzie możesz zobaczyć
+						algorytmy w akcji, zrozumieć ich logikę i poznać kluczowe mechanizmy CV, które napędzają autonomiczne
+						pojazdy, medycynę, robotykę i zmieniają sposób, w jaki żyjemy.
 					</span>
 				</div>
 			</section>
-			<section className="flex flex-col items-center justify-center gap-12 p-8 md:mt-32 mt-16">
+			<section className="flex flex-col items-center justify-center gap-12 p-8 lg:mt-32 mt-16">
 				<Section>
 					<SectionContent>
 						<SectionTitle>Fundamenty Przetwarzania Obrazu</SectionTitle>
@@ -143,8 +143,8 @@ export function Section({ children, reverse = false, className = "", ...props }:
 	return (
 		<section
 			className={`flex items-center justify-center w-full gap-6 ${
-				reverse ? "flex-row-reverse" : "flex-row"
-			} ${className}`}
+				reverse ? "lg:flex-row-reverse" : "lg:flex-row"
+			} flex-col ${className}`}
 			{...props}
 		>
 			{children}
@@ -157,7 +157,9 @@ export function SectionTitle({ children, className = "" }: React.PropsWithChildr
 }
 
 export function SectionContent({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
-	return <div className={`md:w-1/6 flex flex-col items-start justify-center gap-4 ${className}`}>{children}</div>;
+	return (
+		<div className={`xl:w-1/6 lg:w-1/3 flex flex-col items-start justify-center gap-4 ${className}`}>{children}</div>
+	);
 }
 
 export function SectionBadges({ items = [] }: { items?: string[] }) {
@@ -192,7 +194,7 @@ export function SectionImage({
 			alt={alt}
 			width={width}
 			height={height}
-			className={`w-1/6 h-auto rounded-2xl md:block hidden ${className}`}
+			className={`xl:w-1/6 lg:w-1/3 h-auto rounded-2xl ${className}`}
 		/>
 	);
 }
