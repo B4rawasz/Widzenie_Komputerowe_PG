@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import Header from "@/components/header/header";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Footer from "@/components/footer/footer";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 					<Header />
 					{children}
+					<Footer />
 				</ThemeProvider>
 			</body>
 		</html>
