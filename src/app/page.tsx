@@ -143,7 +143,7 @@ export function Section({ children, reverse = false, className = "", ...props }:
 	return (
 		<section
 			className={`flex items-center justify-center w-full gap-6 ${
-				reverse ? "lg:flex-row-reverse" : "lg:flex-row"
+				reverse ? "md:flex-row-reverse" : "md:flex-row"
 			} flex-col ${className}`}
 			{...props}
 		>
