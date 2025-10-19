@@ -1,25 +1,76 @@
 import { notFound } from "next/navigation";
+import { generateStaticParamsForLessons } from "@/lib/mdx-utils";
+import { Metadata } from "next";
 
-export default async function Page({ params }: { params: Promise<{ lessonSlug: string; partSlug: string }> }) {
+type MDXFrontmatter = {
+	title?: string;
+	description?: string;
+	[key: string]: any;
+};
+
+type MDXModule = {
+	default: React.ComponentType;
+	frontmatter: MDXFrontmatter;
+};
+
+async function getLessonPartData(lessonSlug: string, partSlug: string): Promise<MDXModule | null> {
+	try {
+		const mod = (await import(`@/content/${lessonSlug}/${partSlug}.mdx`)) as MDXModule;
+
+		return mod;
+	} catch (error) {
+		return null;
+	}
+}
+
+export default async function LessonPartPage({
+	params,
+}: {
+	params: Promise<{ lessonSlug: string; partSlug: string }>;
+}) {
 	const { lessonSlug, partSlug } = await params;
-	const { MDXelement, metadata } = await import(`@/content/${lessonSlug}/${partSlug}.mdx`)
-		.then((mod) => ({ MDXelement: mod.default, metadata: mod.frontmatter }))
-		.catch(() => ({ MDXelement: null, metadata: null }));
 
-	if (!MDXelement) {
-		return notFound();
+	const data = await getLessonPartData(lessonSlug, partSlug);
+
+	if (!data) {
+		notFound();
 	}
 
-	console.log("Metadata:", metadata);
+	const ContentComponent = data.default;
+	const metadata = data.frontmatter;
 
-	return <MDXelement />;
+	return (
+		<article className="prose lg:prose-xl max-w-4xl mx-auto py-8">
+			<h1>{metadata?.title || partSlug}</h1>
+
+			<ContentComponent />
+		</article>
+	);
 }
 
-/*export function generateStaticParams() {
-  return [
-    { lessonSlug: 'welcome', partSlug: 'intro' },
-    { lessonSlug: 'about', partSlug: 'team' }
-  ]
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ lessonSlug: string; partSlug: string }>;
+}): Promise<Metadata> {
+	const { lessonSlug, partSlug } = await params;
+
+	const data = await getLessonPartData(lessonSlug, partSlug);
+
+	if (!data) {
+		return { title: "Lesson Part Not Found" };
+	}
+
+	const metadata = data.frontmatter;
+
+	return {
+		title: metadata?.title || partSlug,
+		description: metadata?.description || `A lesson part about ${partSlug}.`,
+	};
 }
- 
-export const dynamicParams = false*/
+
+export function generateStaticParams() {
+	return generateStaticParamsForLessons();
+}
+
+export const dynamicParams = false;
