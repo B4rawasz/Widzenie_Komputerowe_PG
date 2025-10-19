@@ -7,7 +7,7 @@ export default function Home() {
 		<>
 			<section className="flex flex-col items-center justify-center gap-6 p-8">
 				<div className="flex flex-col items-center gap-8 text-center lg:w-220 w-full md:my-48 my-24">
-					<h1 className="lg:text-6xl text-4xl lg:h-33 h-fit font-bold text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
+					<h1 className="lg:h-33 h-fit text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
 						Odkryj kod, <br />
 						który uczy maszyny widzieć
 					</h1>
@@ -17,8 +17,8 @@ export default function Home() {
 				</div>
 			</section>
 			<section className="flex flex-col items-center justify-center gap-6 lg:p-8 p-4">
-				<h2 className="lg:text-4xl text-3xl font-bold text-center">Wprowadzenie do Computer Vision</h2>
-				<h3 className="lg:text-xl text-lg text-muted-foreground">Jak maszyny naprawdę "widzą"?</h3>
+				<h2 className="text-center">Wprowadzenie do Computer Vision</h2>
+				<h4 className="text-muted-foreground">Jak maszyny naprawdę "widzą"?</h4>
 				<div className="flex flex-col items-center justify-center gap-6 xl:w-1/2 lg:w-2/3 w-5/6 text-lg">
 					<span>
 						Computer Vision to nie magia, to zaawansowana dziedzina Sztucznej Inteligencji, która uczy algorytmy
@@ -153,7 +153,7 @@ export function Section({ children, reverse = false, className = "", ...props }:
 }
 
 export function SectionTitle({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
-	return <h3 className={`text-2xl font-bold mb-4 ${className}`}>{children}</h3>;
+	return <h3 className={`mb-4 ${className}`}>{children}</h3>;
 }
 
 export function SectionContent({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
