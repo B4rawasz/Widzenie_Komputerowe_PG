@@ -7,7 +7,7 @@ export default function Home() {
 		<>
 			<section className="flex flex-col items-center justify-center gap-6 p-8">
 				<div className="flex flex-col items-center gap-8 text-center lg:w-220 w-full md:my-48 my-24">
-					<h1 className="lg:h-33 h-fit text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
+					<h1 className="lg:text-6xl lg:h-33 h-fit text-transparent bg-clip-text bg-gradient-to-br from-foreground to-muted-foreground">
 						Odkryj kod, <br />
 						który uczy maszyny widzieć
 					</h1>
@@ -33,7 +33,7 @@ export default function Home() {
 						Naszym celem jest budowanie inteligentnych modeli, najczęściej Głębokich Sieci Konwolucyjnych (CNN), które
 						potrafią hierarchicznie wyodrębnić cechy wizualne.
 					</span>
-					<ul className="ml-6 list-disc [&>li]:mt-2">
+					<ul>
 						<li>
 							Niski Poziom: Wykrywanie fundamentalnych elementów, takich jak krawędzie, tekstury i punkty
 							charakterystyczne. To pierwsze "spojrzenie" AI na obraz.
