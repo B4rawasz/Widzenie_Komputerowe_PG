@@ -19,6 +19,7 @@ async function getLessonPartData(lessonSlug: string, partSlug: string): Promise<
 
 		return mod;
 	} catch (error) {
+		console.error("Failed to load lesson part:", { lessonSlug, partSlug, error });
 		return null;
 	}
 }
