@@ -14,7 +14,6 @@ export default async function LessonLayout({
 	// 1. Fetch metadata for ALL parts in this lesson
 	const parts = getAllLessonPartsMetadata(lessonSlug);
 
-	console.log("Lesson parts metadata:", parts);
 
 	return (
 		<div style={{ display: "flex" }}>
