@@ -15,7 +15,7 @@ type MDXModule = {
 
 async function getLessonPartData(lessonSlug: string, partSlug: string): Promise<MDXModule | null> {
 	try {
-		const mod = (await import(`@/content/${lessonSlug}/${partSlug}.mdx`)) as MDXModule;
+		const mod = (await import(`@/content/${lessonSlug}/parts/${partSlug}.mdx`)) as MDXModule;
 
 		return mod;
 	} catch (error) {

@@ -9,20 +9,45 @@ export type LessonPartMetadata = {
 	lessonSlug: string;
 	title: string;
 	order: number;
+	icon?: string;
 };
 
-export function getAllLessonPartsMetadata(lessonSlug: string): LessonPartMetadata[] {
-	const lessonDir = path.join(CONTENT_DIR, lessonSlug);
+export type LessonMetadata = {
+	slug: string;
+	title: string;
+	icon?: string;
+};
 
-	if (!fs.existsSync(lessonDir)) {
-		console.warn(`Lesson directory not found: ${lessonDir}`);
+export function getLessonMetadata(lessonSlug: string): LessonMetadata | null {
+	const lessonPagePath = path.join(CONTENT_DIR, lessonSlug, "page.mdx");
+
+	if (!fs.existsSync(lessonPagePath)) {
+		console.warn(`Lesson page not found: ${lessonPagePath}`);
+		return null;
+	}
+
+	const fileContents = fs.readFileSync(lessonPagePath, "utf8");
+	const { data } = matter(fileContents);
+
+	return {
+		slug: lessonSlug,
+		title: (data.title as string) || lessonSlug,
+		icon: data.icon as string | undefined,
+	};
+}
+
+export function getAllLessonPartsMetadata(lessonSlug: string): LessonPartMetadata[] {
+	const partsDir = path.join(CONTENT_DIR, lessonSlug, "parts");
+
+	if (!fs.existsSync(partsDir)) {
+		console.warn(`Parts directory not found: ${partsDir}`);
 		return [];
 	}
 
-	const filenames = fs.readdirSync(lessonDir).filter((name) => name.endsWith(".mdx"));
+	const filenames = fs.readdirSync(partsDir).filter((name) => name.endsWith(".mdx"));
 
 	const parts = filenames.map((filename) => {
-		const filePath = path.join(lessonDir, filename);
+		const filePath = path.join(partsDir, filename);
 		const fileContents = fs.readFileSync(filePath, "utf8");
 
 		const { data } = matter(fileContents);
@@ -34,10 +59,22 @@ export function getAllLessonPartsMetadata(lessonSlug: string): LessonPartMetadat
 			lessonSlug,
 			title: (data.title as string) || slug,
 			order: (data.order as number) || 999,
+			icon: data.icon as string | undefined,
 		} as LessonPartMetadata;
 	});
 
 	return parts.sort((a, b) => a.order - b.order);
+}
+
+export function generateStaticParamsForLessonPages() {
+	const lessonSlugs = fs
+		.readdirSync(CONTENT_DIR, { withFileTypes: true })
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
+
+	return lessonSlugs.map((lessonSlug) => ({
+		lessonSlug: lessonSlug,
+	}));
 }
 
 export function generateStaticParamsForLessons() {
@@ -49,9 +86,13 @@ export function generateStaticParamsForLessons() {
 	const allParams: { lessonSlug: string; partSlug: string }[] = [];
 
 	for (const lessonSlug of lessonSlugs) {
-		const lessonDir = path.join(CONTENT_DIR, lessonSlug);
+		const partsDir = path.join(CONTENT_DIR, lessonSlug, "parts");
 
-		const filenames = fs.readdirSync(lessonDir).filter((name) => name.endsWith(".mdx"));
+		if (!fs.existsSync(partsDir)) {
+			continue;
+		}
+
+		const filenames = fs.readdirSync(partsDir).filter((name) => name.endsWith(".mdx"));
 
 		for (const filename of filenames) {
 			const partSlug = filename.replace(".mdx", "");
