@@ -3,6 +3,7 @@ import { getAllLessonPartsMetadata, getLessonMetadata } from "@/lib/mdx-utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import * as Icons from "lucide-react";
+import { TableOfContents } from "@/components/mdx/toc";
 
 function getIconComponent(iconName?: string) {
 	if (!iconName) return null;
@@ -57,6 +58,10 @@ export default async function LessonLayout({
 			</aside>
 
 			<main className="xl:w-1/2">{children}</main>
+
+			<aside className="hidden lg:block xl:w-1/4 sticky top-16 h-fit p-10">
+				<TableOfContents />
+			</aside>
 		</div>
 	);
 }
