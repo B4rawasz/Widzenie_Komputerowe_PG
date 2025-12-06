@@ -25,7 +25,7 @@ export function Heading({ level, children, id }: HeadingProps) {
 	return (
 		<Tag
 			id={headingId}
-			className="group relative scroll-mt-20 transition-colors cursor-pointer flex items-center my-6"
+			className="group relative scroll-mt-20 transition-colors cursor-pointer flex items-baseline my-6"
 			onClick={handleClick}
 		>
 			{children}
@@ -33,7 +33,11 @@ export function Heading({ level, children, id }: HeadingProps) {
 				className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
 				aria-label="Copy link to heading"
 			>
-				{copied ? <Check className="h-4 text-green-500" /> : <Link className="h-4" />}
+				{copied ? (
+					<Check className="w-[0.75em] h-[0.75em] text-green-500" />
+				) : (
+					<Link className="w-[0.75em] h-[0.75em]" />
+				)}
 			</button>
 		</Tag>
 	);
