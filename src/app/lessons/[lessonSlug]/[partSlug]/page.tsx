@@ -41,8 +41,8 @@ export default async function LessonPartPage({
 	const metadata = data.frontmatter;
 
 	return (
-		<article className="prose lg:prose-xl max-w-4xl mx-auto py-8">
-			<h1>{metadata?.title || partSlug}</h1>
+		<article id="lessonContent" className="prose lg:prose-xl max-w-4xl mx-auto py-8">
+			<h1 className="mb-12">{metadata?.title || partSlug}</h1>
 
 			<ContentComponent />
 		</article>
