@@ -128,16 +128,16 @@
 		@apply bg-background text-foreground;
 	}
 	h1 {
-		@apply text-4xl font-extrabold tracking-tight text-balance leading-[normal];
+		@apply text-4xl font-extrabold tracking-tight text-balance;
 	}
 	h2 {
-		@apply text-3xl font-semibold tracking-tight leading-[normal];
+		@apply text-3xl font-semibold tracking-tight;
 	}
 	h3 {
-		@apply text-2xl font-semibold tracking-tight leading-[normal];
+		@apply text-2xl font-semibold tracking-tight;
 	}
 	h4 {
-		@apply text-xl font-semibold tracking-tight leading-[normal];
+		@apply text-xl font-semibold tracking-tight;
 	}
 	blockquote {
 		@apply mt-6 border-l-2 pl-6 italic text-muted-foreground;
@@ -151,5 +151,20 @@
 
 	#lessonContent p {
 		@apply my-6;
+	}
+
+	#lessonContent {
+		h1 {
+			@apply leading-[normal];
+		}
+		h2 {
+			@apply leading-[normal];
+		}
+		h3 {
+			@apply leading-[normal];
+		}
+		h4 {
+			@apply leading-[normal];
+		}
 	}
 }
