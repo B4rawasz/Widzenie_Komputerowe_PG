@@ -15,8 +15,21 @@ export type LessonPartMetadata = {
 export type LessonMetadata = {
 	slug: string;
 	title: string;
+	order: number;
 	icon?: string;
 };
+
+export function getAllLessonsMetadata() {
+	const lessonsFolders = fs.readdirSync(CONTENT_DIR, { withFileTypes: true }).filter((dirent) => dirent.isDirectory());
+
+	const lessonsMetadata: LessonMetadata[] = lessonsFolders
+		.map((folder) => {
+			return getLessonMetadata(folder.name);
+		})
+		.filter((metadata): metadata is LessonMetadata => metadata !== null);
+
+	return lessonsMetadata;
+}
 
 export function getLessonMetadata(lessonSlug: string): LessonMetadata | null {
 	const lessonPagePath = path.join(CONTENT_DIR, lessonSlug, "page.mdx");
@@ -32,6 +45,7 @@ export function getLessonMetadata(lessonSlug: string): LessonMetadata | null {
 	return {
 		slug: lessonSlug,
 		title: (data.title as string) || lessonSlug,
+		order: (data.order as number) || 999,
 		icon: data.icon as string | undefined,
 	};
 }
