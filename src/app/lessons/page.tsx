@@ -29,6 +29,10 @@ export default function LessonPage() {
 				</Button>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-2">
+				{lesson.coverImage && (
+					<img src={lesson.coverImage} alt={`${lesson.title} cover`} className="w-full h-auto rounded-md" />
+				)}
+				<p>{lesson.description}</p>
 				{lesson.parts.map((part: any) => (
 					<Button asChild variant="ghost" size={"sm"} key={part.slug}>
 						<Link href={`/lessons/${lesson.slug}/${part.slug}`} className="text-muted-foreground">

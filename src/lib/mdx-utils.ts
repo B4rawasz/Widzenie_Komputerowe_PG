@@ -16,6 +16,9 @@ export type LessonMetadata = {
 	slug: string;
 	title: string;
 	order: number;
+	description: string;
+	tags: string[];
+	coverImage?: string;
 	icon?: string;
 };
 
@@ -46,6 +49,9 @@ export function getLessonMetadata(lessonSlug: string): LessonMetadata | null {
 		slug: lessonSlug,
 		title: (data.title as string) || lessonSlug,
 		order: (data.order as number) || 999,
+		description: (data.description as string) || "",
+		tags: (data.tags as string[]) || [],
+		coverImage: (data.coverImage as string) || undefined,
 		icon: data.icon as string | undefined,
 	};
 }
