@@ -22,14 +22,30 @@ export type LessonMetadata = {
 	icon?: string;
 };
 
+export type AllLessonsMetadata = {
+	lesson: LessonMetadata;
+	parts: LessonPartMetadata[];
+}[];
+
 export function getAllLessonsMetadata() {
 	const lessonsFolders = fs.readdirSync(CONTENT_DIR, { withFileTypes: true }).filter((dirent) => dirent.isDirectory());
 
-	const lessonsMetadata: LessonMetadata[] = lessonsFolders
-		.map((folder) => {
-			return getLessonMetadata(folder.name);
+	const lessonsMetadata: AllLessonsMetadata = lessonsFolders
+		.map((dirent) => {
+			const lessonSlug = dirent.name;
+			const lessonMetadata = getLessonMetadata(lessonSlug);
+			const lessonPartsMetadata = getAllLessonPartsMetadata(lessonSlug);
+			if (!lessonMetadata) {
+				return {};
+			}
+			return {
+				lesson: lessonMetadata,
+				parts: lessonPartsMetadata,
+			};
 		})
-		.filter((metadata): metadata is LessonMetadata => metadata !== null);
+		.filter((item) => item.lesson !== undefined) as AllLessonsMetadata;
+
+	lessonsMetadata.sort((a, b) => a.lesson.order - b.lesson.order);
 
 	return lessonsMetadata;
 }

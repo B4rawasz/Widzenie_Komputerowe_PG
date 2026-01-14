@@ -33,7 +33,7 @@ export default async function LessonLayout({
 	return (
 		<div className="flex flex-row">
 			<aside className="xl:w-1/4 relative">
-				<nav className="p-10 flex flex-col items-end sticky top-16 h-fit">
+				<nav className="p-10 flex flex-col items-end sticky h-fit">
 					<span className="w-2/3 mb-2">
 						<Button asChild variant="ghost" size={"sm"} className="text-lg">
 							<Link href={`/lessons/${lessonSlug}`} className="flex items-center gap-2">
