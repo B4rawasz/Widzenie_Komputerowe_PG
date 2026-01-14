@@ -131,7 +131,7 @@
 		@apply text-4xl font-extrabold tracking-tight text-balance;
 	}
 	h2 {
-		@apply text-3xl font-semibold tracking-tight;
+		@apply text-3xl font-bold tracking-tight;
 	}
 	h3 {
 		@apply text-2xl font-semibold tracking-tight;
