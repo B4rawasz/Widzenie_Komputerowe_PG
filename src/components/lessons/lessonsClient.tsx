@@ -9,9 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata }) {
-	const [selectedTag, setSelectedTag] = useState("all");
+	const [checkedTags, setCheckedTags] = useState<string[]>([]);
 
 	const lessonsTags = lessons.reduce((acc: string[], lesson) => {
 		lesson.lesson.tags.forEach((tag) => {
@@ -21,15 +22,21 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 		});
 		return acc;
 	}, []);
-	lessonsTags.unshift("All");
 
-	// Filtrowanie lekcji po tagu
+	const handleCheckboxChange = (tag: string) => {
+		setCheckedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
+	};
+
 	const filteredLessons =
-		selectedTag === "all"
+		checkedTags.length === 0
 			? lessons.map((lesson) => lesson.lesson)
 			: lessons
 					.map((lesson) => lesson.lesson)
-					.filter((lesson) => lesson.tags.map((t) => t.toLowerCase()).includes(selectedTag));
+					.filter((lesson) =>
+						checkedTags.every((checkedTag) =>
+							lesson.tags.map((t) => t.toLowerCase()).includes(checkedTag.toLowerCase())
+						)
+					);
 
 	// Animations for lesson cards
 	const lessonsList = (
@@ -49,7 +56,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 				>
 					{lesson.coverImage && (
 						<div>
-							<img src={lesson.coverImage} alt={lesson.title} className="w-full object-cover rounded-t-xl" />
+							<img src={lesson.coverImage} alt={lesson.title} className="w-full mask-clip-border" />
 						</div>
 					)}
 					<div className="flex flex-col gap-2 px-6">
@@ -77,19 +84,24 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 	return (
 		<div className="max-w-360 mx-auto flex flex-row">
 			<aside className="xl:w-1/4 relative">
-				<RadioGroup
-					defaultValue="all"
-					value={selectedTag}
-					onValueChange={setSelectedTag}
-					className="sticky top-16 h-fit pt-10"
-				>
-					{lessonsTags.map((tag) => (
-						<div key={tag} className="flex items-center gap-3 mb-2">
-							<RadioGroupItem value={tag.toLowerCase()} id={tag.toLowerCase()} />
-							<Label htmlFor={tag.toLowerCase()}>{tag}</Label>
-						</div>
-					))}
-				</RadioGroup>
+				{lessonsTags.map((tag) => (
+					<div key={tag} className="flex items-center gap-3 mb-2">
+						<Label htmlFor={tag.toLowerCase()} className="cursor-pointer">
+							<Checkbox
+								id={tag.toLowerCase()}
+								className="peer hidden"
+								checked={checkedTags.includes(tag)}
+								onCheckedChange={() => handleCheckboxChange(tag)}
+							/>
+							<Badge
+								variant="secondary"
+								className="peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground transition-colors"
+							>
+								{tag}
+							</Badge>
+						</Label>
+					</div>
+				))}
 			</aside>
 			<div className="w-full flex flex-col">
 				<h1 className="mt-8 text-3xl font-bold">All Lessons</h1>
