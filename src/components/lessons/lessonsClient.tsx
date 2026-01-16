@@ -121,7 +121,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 
 	return (
 		<div className="max-w-360 mx-auto flex flex-row">
-			<aside className="w-1/4 sticky top-16 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-4rem)] px-2 flex flex-col">
+			<aside className="w-1/5 sticky top-16 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-4rem)] px-2 flex flex-col">
 				<h2 className="mt-8 mb-3">Filter by Tags</h2>
 				<ScrollArea className="flex-1 min-h-0 pr-2">
 					<div className="flex flex-col flex-wrap gap-2 pr-2">
@@ -132,7 +132,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 					</div>
 				</ScrollArea>
 			</aside>
-			<div className="w-full flex flex-col mb-4">
+			<div className="flex-1 flex flex-col mb-4">
 				<h2 className="mt-8">All Lessons</h2>
 				<span className="text-muted-foreground mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
 				<div className="grid grid-cols-3 gap-4">{lessonsList}</div>
