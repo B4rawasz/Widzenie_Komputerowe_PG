@@ -1,6 +1,7 @@
 import { getAllLessonPartsMetadata, getLessonMetadata } from "@/lib/mdx-utils";
 import { TableOfContents } from "@/components/mdx/toc";
 import { NavClient } from "@/components/mdx/nav";
+import PageNav from "@/components/mdx/page-nav";
 
 export default async function LessonLayout({
 	children,
@@ -20,7 +21,10 @@ export default async function LessonLayout({
 				<NavClient lessonSlug={lessonSlug} lesson={lesson} parts={parts} />
 			</aside>
 
-			<main className="flex-1">{children}</main>
+			<main className="flex-1 mb-2">
+				{children}
+				<PageNav lesson={lesson} parts={parts} />
+			</main>
 
 			<aside className="w-1/5 sticky top-16 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-4rem)] px-2 flex flex-col pt-8">
 				<TableOfContents />

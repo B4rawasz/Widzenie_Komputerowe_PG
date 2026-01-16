@@ -53,12 +53,12 @@ export function getAllLessonsMetadata() {
 	return lessonsMetadata;
 }
 
-export function getLessonMetadata(lessonSlug: string): LessonMetadata | null {
+export function getLessonMetadata(lessonSlug: string): LessonMetadata {
 	const lessonPagePath = path.join(CONTENT_DIR, lessonSlug, "page.mdx");
 
 	if (!fs.existsSync(lessonPagePath)) {
 		console.warn(`Lesson page not found: ${lessonPagePath}`);
-		return null;
+		return {} as LessonMetadata;
 	}
 
 	const fileContents = fs.readFileSync(lessonPagePath, "utf8");
