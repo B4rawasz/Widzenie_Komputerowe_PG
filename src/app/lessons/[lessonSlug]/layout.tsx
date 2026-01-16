@@ -21,7 +21,7 @@ export default async function LessonLayout({
 				<NavClient lessonSlug={lessonSlug} lesson={lesson} parts={parts} />
 			</aside>
 
-			<main className="flex-1 mb-2">
+			<main className="flex-1 mb-2 flex flex-col justify-between">
 				{children}
 				<PageNav lesson={lesson} parts={parts} />
 			</main>

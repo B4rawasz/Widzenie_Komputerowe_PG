@@ -39,7 +39,7 @@ export default function PageNav({ lesson, parts }: { lesson: LessonMetadata; par
 			{nextPage ? (
 				<Link
 					href={nextPage.slug}
-					className="bg-secondary text-secondary-foreground hover:bg-secondary/80 flex flex-row gap-2 p-6 transition-all rounded-md justify-end"
+					className="bg-primary text-primary-foreground hover:bg-primary/80 flex flex-row gap-2 p-6 transition-all rounded-md justify-end"
 				>
 					{nextPage.title}
 					<ArrowRight />
