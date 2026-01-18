@@ -38,19 +38,19 @@ export default function Header() {
 										</NavigationMenuLink>
 										<div>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?beginner" className="p-3 w-48">
+												<Link href="/lessons?l=beginner" className="p-3 w-48">
 													<span className="font-bold leading-none">Beginner</span>
 													<span className="text-muted-foreground leading-none">Start your journey</span>
 												</Link>
 											</NavigationMenuLink>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?intermediate" className="p-3 w-48">
+												<Link href="/lessons?l=intermediate" className="p-3 w-48">
 													<span className="font-bold leading-none">Intermediate</span>
 													<span className="text-muted-foreground leading-none">Level up your skills</span>
 												</Link>
 											</NavigationMenuLink>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?advanced" className="p-3 w-48">
+												<Link href="/lessons?l=advanced" className="p-3 w-48">
 													<span className="font-bold leading-none">Advanced</span>
 													<span className="text-muted-foreground leading-none">Master the concepts</span>
 												</Link>

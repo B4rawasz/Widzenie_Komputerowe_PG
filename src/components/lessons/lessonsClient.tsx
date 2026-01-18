@@ -9,9 +9,23 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSearchParams } from "next/navigation";
 
 export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata }) {
 	const [checkedTags, setCheckedTags] = useState<string[]>([]);
+
+	const searchParams = useSearchParams();
+	const level = searchParams.get("l");
+
+	if (
+		level &&
+		(level == "beginner" || level == "intermediate" || level == "advanced") &&
+		!checkedTags.includes(level)
+	) {
+		setCheckedTags([level]);
+	} else if (!level && checkedTags.length > 0) {
+		setCheckedTags([]);
+	}
 
 	const lessonsTags = {
 		topics: lessons.reduce((acc: string[], lesson) => {
@@ -46,8 +60,8 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 					.filter(
 						(lesson) =>
 							checkedTags.every((checkedTag) =>
-								lesson.tags.skill_level.toLowerCase().includes(checkedTag.toLowerCase())
-							) || lesson.tags.topic.some((tag) => checkedTags.includes(tag))
+								lesson.tags.skill_level.toLowerCase().includes(checkedTag.toLowerCase()),
+							) || lesson.tags.topic.some((tag) => checkedTags.includes(tag)),
 					);
 
 	// Animations for lesson cards
