@@ -30,7 +30,7 @@ export function TableOfContents() {
 		setHeadings(items);
 
 		const handleScroll = () => {
-			const scrollPosition = window.scrollY + 96;
+			const scrollPosition = window.scrollY + 128;
 			let currentId = items[0]?.id ?? "";
 			for (const heading of items) {
 				const el = document.getElementById(heading.id);
@@ -74,8 +74,8 @@ export function TableOfContents() {
 
 	return (
 		<ScrollArea className="flex-1 min-h-0 pl-2 relative">
-			<div style={{ position: "relative" }}>
-				<ul className="text-sm my-0 relative" ref={listRef} style={{ position: "relative" }}>
+			<div className="relative ml-4">
+				<ul className="text-sm my-0 relative" ref={listRef}>
 					{blobStyle && (
 						<motion.div
 							layout
@@ -115,7 +115,7 @@ export function TableOfContents() {
 									ref={(el) => {
 										textRefs.current[heading.id] = el;
 									}}
-									style={{ display: "inline-block" }}
+									className="inline-block"
 								>
 									{heading.text}
 								</span>
