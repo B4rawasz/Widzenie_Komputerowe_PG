@@ -46,7 +46,7 @@ export default function RootLayout({
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 					<FaviconUpdater />
 					<Header />
-					{children}
+					<main className="min-h-[calc(100vh-8rem)]">{children}</main>
 					<Footer />
 				</ThemeProvider>
 			</body>

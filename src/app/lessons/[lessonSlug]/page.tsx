@@ -35,7 +35,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
 	const metadata = data.frontmatter;
 
 	return (
-		<article className="prose lg:prose-xl max-w-4xl mx-auto py-8">
+		<article className="prose lg:prose-xl max-w-4xl py-8">
 			<h1>{metadata?.title || lessonSlug}</h1>
 
 			<ContentComponent />

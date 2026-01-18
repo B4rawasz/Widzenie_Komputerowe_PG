@@ -65,7 +65,7 @@ export default function Home() {
 						</span>
 						<SectionBadges items={["Kernel", "Wykrywanie krawędzi", "Pismo ręczne"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/400x600.png"} />
+					<SectionImage src={"https://placehold.co/600x400.png"} />
 				</Section>
 
 				<Section reverse>
@@ -80,7 +80,7 @@ export default function Home() {
 						</span>
 						<SectionBadges items={["Klasyfikacja", "Detekcja"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/400x600.png"} />
+					<SectionImage src={"https://placehold.co/600x400.png"} />
 				</Section>
 
 				<Section>
@@ -97,7 +97,7 @@ export default function Home() {
 						</span>
 						<SectionBadges items={["Segmentacja Semantyczna", "Segmentacja Instancyjna"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/400x600.png"} />
+					<SectionImage src={"https://placehold.co/600x400.png"} />
 				</Section>
 
 				<Section reverse>
@@ -113,7 +113,7 @@ export default function Home() {
 						</span>
 						<SectionBadges items={["Wektor Prawdopodobieństwa", "Softmax", "Ocena Lokalizacji"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/400x600.png"} />
+					<SectionImage src={"https://placehold.co/600x400.png"} />
 				</Section>
 
 				<Section>
@@ -127,7 +127,7 @@ export default function Home() {
 						<span>Zobaczysz, jak różne gałęzie AI współpracują, by tworzyć zaawansowane aplikacje.</span>
 						<SectionBadges items={["Analiza Geometrii Ciała", "Generowanie Opisów", "Heatmap"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/400x600.png"} />
+					<SectionImage src={"https://placehold.co/600x400.png"} />
 				</Section>
 			</section>
 		</>
@@ -158,7 +158,7 @@ export function SectionTitle({ children, className = "" }: React.PropsWithChildr
 
 export function SectionContent({ children, className = "" }: React.PropsWithChildren<{ className?: string }>) {
 	return (
-		<div className={`xl:w-1/6 lg:w-1/3 flex flex-col items-start justify-center gap-4 ${className}`}>{children}</div>
+		<div className={`xl:w-1/4 lg:w-1/3 flex flex-col items-start justify-center gap-4 ${className}`}>{children}</div>
 	);
 }
 
@@ -194,7 +194,7 @@ export function SectionImage({
 			alt={alt}
 			width={width}
 			height={height}
-			className={`xl:w-1/6 lg:w-1/3 h-auto rounded-2xl ${className}`}
+			className={`xl:w-1/4 lg:w-1/3 h-auto rounded-2xl ${className}`}
 		/>
 	);
 }

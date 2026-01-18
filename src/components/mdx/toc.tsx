@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface TocItem {
 	id: string;
@@ -12,6 +14,11 @@ interface TocItem {
 export function TableOfContents() {
 	const [headings, setHeadings] = useState<TocItem[]>([]);
 	const [activeId, setActiveId] = useState<string>("");
+	const [blobStyle, setBlobStyle] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+	const pathname = usePathname();
+	const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+	const textRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+	const listRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
 		const elements = Array.from(document.querySelectorAll("h2, h3, h4"));
@@ -22,21 +29,39 @@ export function TableOfContents() {
 		}));
 		setHeadings(items);
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						setActiveId(entry.target.id);
-					}
-				});
-			},
-			{ rootMargin: "-20% 0% -35% 0%" }
-		);
+		const handleScroll = () => {
+			const scrollPosition = window.scrollY + 128;
+			let currentId = items[0]?.id ?? "";
+			for (const heading of items) {
+				const el = document.getElementById(heading.id);
+				if (el && el.offsetTop <= scrollPosition) {
+					currentId = heading.id;
+				}
+			}
+			setActiveId(currentId);
+		};
 
-		elements.forEach((element) => observer.observe(element));
+		window.addEventListener("scroll", handleScroll);
+		handleScroll();
 
-		return () => observer.disconnect();
-	}, []);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [pathname]);
+
+	useEffect(() => {
+		if (!activeId || !textRefs.current[activeId] || !listRef.current) {
+			setBlobStyle(null);
+			return;
+		}
+		const el = textRefs.current[activeId];
+		const listRect = listRef.current.getBoundingClientRect();
+		const rect = el!.getBoundingClientRect();
+		setBlobStyle({
+			top: rect.top - listRect.top - 2,
+			left: rect.left - listRect.left - 8,
+			width: rect.width + 16,
+			height: rect.height + 4,
+		});
+	}, [activeId, headings]);
 
 	const handleClick = (id: string) => {
 		const element = document.getElementById(id);
@@ -48,27 +73,57 @@ export function TableOfContents() {
 	if (headings.length === 0) return null;
 
 	return (
-		<nav>
-			<ScrollArea className="h-[calc(100vh-200px)]">
-				<ul className="text-sm my-0">
+		<ScrollArea className="flex-1 min-h-0 pl-2 relative">
+			<div className="relative ml-4">
+				<ul className="text-sm my-0 relative" ref={listRef}>
+					{blobStyle && (
+						<motion.div
+							layout
+							transition={{
+								type: "spring",
+								stiffness: 250,
+								damping: 40,
+								mass: 1.5,
+							}}
+							style={{
+								top: blobStyle.top,
+								left: blobStyle.left,
+								width: blobStyle.width,
+								height: blobStyle.height,
+								borderRadius: "9999px",
+								zIndex: 0,
+							}}
+							className="absolute bg-primary rounded-full pointer-events-none"
+						/>
+					)}
 					{headings.map((heading) => (
 						<li
 							key={heading.id}
 							style={{ paddingLeft: `${(heading.level - 2) * 12}px` }}
-							className="list-none first:mt-0"
+							className="list-none first:mt-0 relative"
 						>
 							<button
+								ref={(el) => {
+									itemRefs.current[heading.id] = el;
+								}}
 								onClick={() => handleClick(heading.id)}
-								className={`text-left w-full hover:text-foreground transition-colors ${
+								className={`text-left w-full hover:text-foreground transition-colors relative z-10 ${
 									activeId === heading.id ? "text-foreground font-medium" : "text-muted-foreground"
 								}`}
 							>
-								{heading.text}
+								<span
+									ref={(el) => {
+										textRefs.current[heading.id] = el;
+									}}
+									className="inline-block"
+								>
+									{heading.text}
+								</span>
 							</button>
 						</li>
 					))}
 				</ul>
-			</ScrollArea>
-		</nav>
+			</div>
+		</ScrollArea>
 	);
 }
