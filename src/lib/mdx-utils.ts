@@ -30,6 +30,15 @@ export type AllLessonsMetadata = {
 	parts: LessonPartMetadata[];
 }[];
 
+function sanitizeSlug(input: string): string {
+	let slug = String(input).replace(/[^a-zA-Z0-9-_]/g, "-");
+	slug = slug.replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+	if (!slug) {
+		return "part";
+	}
+	return slug;
+}
+
 export function getAllLessonsMetadata() {
 	const lessonsFolders = fs.readdirSync(CONTENT_DIR, { withFileTypes: true }).filter((dirent) => dirent.isDirectory());
 
@@ -54,7 +63,8 @@ export function getAllLessonsMetadata() {
 }
 
 export function getLessonMetadata(lessonSlug: string): LessonMetadata {
-	const lessonPagePath = path.join(CONTENT_DIR, lessonSlug, "page.mdx");
+	const sanitizedLessonSlug = sanitizeSlug(lessonSlug);
+	const lessonPagePath = path.join(CONTENT_DIR, sanitizedLessonSlug, "page.mdx");
 
 	if (!fs.existsSync(lessonPagePath)) {
 		console.warn(`Lesson page not found: ${lessonPagePath}`);
@@ -65,8 +75,8 @@ export function getLessonMetadata(lessonSlug: string): LessonMetadata {
 	const { data } = matter(fileContents);
 
 	return {
-		slug: lessonSlug,
-		title: (data.title as string) || lessonSlug,
+		slug: sanitizedLessonSlug,
+		title: (data.title as string) || sanitizedLessonSlug,
 		order: (data.order as number) || 999,
 		description: (data.description as string) || "",
 		tags: {
@@ -79,7 +89,8 @@ export function getLessonMetadata(lessonSlug: string): LessonMetadata {
 }
 
 export function getAllLessonPartsMetadata(lessonSlug: string): LessonPartMetadata[] {
-	const partsDir = path.join(CONTENT_DIR, lessonSlug, "parts");
+	const sanitizedLessonSlug = sanitizeSlug(lessonSlug);
+	const partsDir = path.join(CONTENT_DIR, sanitizedLessonSlug, "parts");
 
 	if (!fs.existsSync(partsDir)) {
 		console.warn(`Parts directory not found: ${partsDir}`);
@@ -94,11 +105,12 @@ export function getAllLessonPartsMetadata(lessonSlug: string): LessonPartMetadat
 
 		const { data } = matter(fileContents);
 
-		const slug = filename.replace(".mdx", "");
+		const rawSlug = filename.replace(".mdx", "");
+		const slug = sanitizeSlug(rawSlug);
 
 		return {
 			slug,
-			lessonSlug,
+			lessonSlug: sanitizedLessonSlug,
 			title: (data.title as string) || slug,
 			order: (data.order as number) || 999,
 			icon: data.icon as string | undefined,
@@ -115,7 +127,7 @@ export function generateStaticParamsForLessonPages() {
 		.map((dirent) => dirent.name);
 
 	return lessonSlugs.map((lessonSlug) => ({
-		lessonSlug: lessonSlug,
+		lessonSlug: sanitizeSlug(lessonSlug),
 	}));
 }
 
@@ -128,7 +140,8 @@ export function generateStaticParamsForLessons() {
 	const allParams: { lessonSlug: string; partSlug: string }[] = [];
 
 	for (const lessonSlug of lessonSlugs) {
-		const partsDir = path.join(CONTENT_DIR, lessonSlug, "parts");
+		const sanitizedLessonSlug = sanitizeSlug(lessonSlug);
+		const partsDir = path.join(CONTENT_DIR, sanitizedLessonSlug, "parts");
 
 		if (!fs.existsSync(partsDir)) {
 			continue;
@@ -137,10 +150,11 @@ export function generateStaticParamsForLessons() {
 		const filenames = fs.readdirSync(partsDir).filter((name) => name.endsWith(".mdx"));
 
 		for (const filename of filenames) {
-			const partSlug = filename.replace(".mdx", "");
+			const rawPartSlug = filename.replace(".mdx", "");
+			const partSlug = sanitizeSlug(rawPartSlug);
 
 			allParams.push({
-				lessonSlug: lessonSlug,
+				lessonSlug: sanitizedLessonSlug,
 				partSlug: partSlug,
 			});
 		}

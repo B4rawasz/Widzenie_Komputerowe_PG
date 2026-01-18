@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,15 +17,17 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 	const searchParams = useSearchParams();
 	const level = searchParams.get("l");
 
-	if (
-		level &&
-		(level == "beginner" || level == "intermediate" || level == "advanced") &&
-		!checkedTags.includes(level)
-	) {
-		setCheckedTags([level]);
-	} else if (!level && checkedTags.length > 0) {
-		setCheckedTags([]);
-	}
+	useEffect(() => {
+		if (
+			level &&
+			(level == "beginner" || level == "intermediate" || level == "advanced") &&
+			!checkedTags.includes(level)
+		) {
+			setCheckedTags([level]);
+		} else if (!level && checkedTags.length > 0) {
+			setCheckedTags([]);
+		}
+	}, [level]);
 
 	const lessonsTags = {
 		topics: lessons.reduce((acc: string[], lesson) => {
