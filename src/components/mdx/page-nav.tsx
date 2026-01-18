@@ -24,26 +24,24 @@ export default function PageNav({ lesson, parts }: { lesson: LessonMetadata; par
 	const nextPage = currentIndex < pages.length - 1 ? pages[currentIndex + 1] : null;
 
 	return (
-		<nav className="grid grid-cols-2 gap-2">
+		<nav className="flex flex-row justify-between">
 			{prevPage ? (
-				<Link
-					href={prevPage.slug}
-					className="bg-secondary text-secondary-foreground hover:bg-secondary/80 flex flex-row gap-2 p-6 transition-all rounded-md"
-				>
-					<ArrowLeft />
-					{prevPage.title}
-				</Link>
+				<Button asChild variant="secondary">
+					<Link href={prevPage.slug}>
+						<ArrowLeft />
+						{prevPage.title}
+					</Link>
+				</Button>
 			) : (
 				<span />
 			)}
 			{nextPage ? (
-				<Link
-					href={nextPage.slug}
-					className="bg-primary text-primary-foreground hover:bg-primary/80 flex flex-row gap-2 p-6 transition-all rounded-md justify-end"
-				>
-					{nextPage.title}
-					<ArrowRight />
-				</Link>
+				<Button asChild>
+					<Link href={nextPage.slug}>
+						{nextPage.title}
+						<ArrowRight />
+					</Link>
+				</Button>
 			) : (
 				<span />
 			)}
