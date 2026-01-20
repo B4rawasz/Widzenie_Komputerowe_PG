@@ -1,0 +1,179 @@
+---
+title: "3 - Pętla Detekcji"
+order: 4
+description: "Analiza wideo klatka po klatce"
+icon: Play
+---
+
+## Łączenie wszystkiego w pracę
+
+Mamy detektora i strumień wideo, ale system jeszcze nic nie robi. Potrzebujemy pętli, która będzie cyklicznie:
+
+1. Pobierać klatkę z wideo
+2. Wysyłać ją do detektora
+3. Pobierać wyniki
+4. Powtarzać to na bieżąco
+
+Ta pętla to serce naszej aplikacji - bez niej wszystko co przygotowaliśmy pozostałoby nieużyteczne.
+
+## requestAnimationFrame - synchronizacja z ekranem
+
+Przeglądarki odświeżają ekran około 60 razy na sekundę. Mówimy o tym jako o 60 FPS (frames per second). Jeśli będziemy analizować wideo niezgodnie z tym ritnem, otrzymamy jądrę lub spowolnienia.
+
+Dlatego używamy `requestAnimationFrame` - specjalnego API które synchronizuje naszą pętlę z odświeżaniem ekranu.
+
+### Jak to działa
+
+```typescript
+const detect = async () => {
+	// Tutaj robimy pracę
+
+	// Na koniec planujemy następną klatkę
+	animationFrameId = requestAnimationFrame(detect);
+};
+
+// Start
+animationFrameId = requestAnimationFrame(detect);
+```
+
+`requestAnimationFrame()` przyjmuje funkcję i mówi przeglądarce: "uruchom tę funkcję zanim odświeżysz ekran". Przeglądarka gwarantuje, że będzie to około 16ms później (1000ms / 60 FPS).
+
+Wywołując `requestAnimationFrame()` z powrotem na koniec `detect()`, tworzymy pętlę.
+
+## Sprawdzanie gotowości wideo
+
+Na początku `detect()` musimy upewnić się, że wszystkie elementy są dostępne i wideo ma dane:
+
+```typescript
+const detect = async () => {
+	// Sprawdzamy czy referencje istnieją
+	if (!videoRef.current || !detector || !canvasRef.current) return;
+
+	// Sprawdzamy czy wideo ma załadowane piksele
+	if (videoRef.current.readyState < 2) {
+		animationFrameId = requestAnimationFrame(detect);
+		return;
+	}
+
+	// ... analiza
+
+	animationFrameId = requestAnimationFrame(detect);
+};
+```
+
+Jeśli warunki nie są spełnione, planujemy ponowną próbę w następnej klatce. To bezpieczne i niezawodne.
+
+## Wysyłanie klatki do detektora
+
+Teraz wysyłamy rzeczywisty obraz do analizy:
+
+```typescript
+try {
+	const hands = await detector.estimateHands(videoRef.current);
+	drawHands(hands, canvasRef.current);
+} catch (error) {
+	console.error(error);
+}
+```
+
+Funkcja `estimateHands()`:
+
+1. Pobiera aktualną klatkę z elementu `<video>`
+2. Konwertuje ją do tensora (wielowymiarowej tablicy liczb)
+3. Przesyła tensor do GPU
+4. Przepuszcza przez sieć neuronową
+5. Zwraca tablicę obiektów `Hand`
+
+Każdy obiekt `Hand` zawiera 21 punktów kluczowych z współrzędnymi (x, y) oraz (x, y, z).
+
+### Co to jest `Hand`
+
+```typescript
+interface Hand {
+	keypoints: Array<{ x: number; y: number }>;
+	keypoints3D: Array<{ x: number; y: number; z: number }>;
+	handedness: "Left" | "Right";
+	score: number; // 0 do 1, pewność detekcji
+}
+```
+
+Tablica `hands` może zawierać 0, 1 lub 2 dłonie - w zależności od tego co widać na kamerze.
+
+## Rysowanie wyników
+
+Po otrzymaniu wyników natychmiast je rysujemy:
+
+```typescript
+drawHands(hands, canvasRef.current);
+```
+
+O funkcji `drawHands()` będziemy mówić w następnym kroku.
+
+## Planowanie następnej klatki
+
+Na koniec pętli planujemy kolejną iterację:
+
+```typescript
+animationFrameId = requestAnimationFrame(detect);
+```
+
+Ta linia gwarantuje, że `detect()` zostanie wywołana zaraz po odświeżeniu ekranu.
+
+## Zatrzymanie pętli
+
+Gdzieś w kodzie musimy mieć sposób na zatrzymanie pętli. Robiliśmy to w funkcji cleanup:
+
+```typescript
+return () => {
+	if (animationFrameId) cancelAnimationFrame(animationFrameId);
+};
+```
+
+`cancelAnimationFrame()` anuluje zaplanowaną iterację.
+
+## Pełna struktura detect()
+
+Podsumowanie całej funkcji:
+
+```typescript
+const detect = async () => {
+	// Sprawdzenie gotowości
+	if (!videoRef.current || !detector || !canvasRef.current) return;
+	if (videoRef.current.readyState < 2) {
+		animationFrameId = requestAnimationFrame(detect);
+		return;
+	}
+
+	// Analiza
+	try {
+		const hands = await detector.estimateHands(videoRef.current);
+		drawHands(hands, canvasRef.current);
+	} catch (error) {
+		console.error(error);
+	}
+
+	// Kolejna klatka
+	animationFrameId = requestAnimationFrame(detect);
+};
+```
+
+## Co się dzieje w praktyce
+
+1. 0ms - `detect()` się uruchamia
+2. ~5ms - `estimateHands()` analizuje obraz
+3. ~10ms - `drawHands()` rysuje wyniki
+4. ~15ms - planujemy następną iterację
+5. ~16ms - przeglądarka odświeża ekran
+6. ~16ms - `detect()` uruchamia się ponownie
+
+Cały cykl trwa około 16ms, co odpowiada 60 FPS.
+
+## Podsumowanie
+
+✓ `requestAnimationFrame` synchronizuje pętlę z odświeżaniem ekranu  
+✓ Sprawdzamy gotowość wideo przed analizą  
+✓ `estimateHands()` zwraca pozycje 21 punktów dłoni  
+✓ Wyniki od razu wizualizujemy  
+✓ Pętla powtarza się co klatkę
+
+W następnym kroku nauczymy się rysować te punkty na canvasie - czyli wizualizować to co detektor znalazł.

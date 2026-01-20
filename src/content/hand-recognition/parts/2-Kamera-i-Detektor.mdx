@@ -9,170 +9,76 @@ icon: Camera
 
 W poprzednim kroku przygotowaliśmy fundamenty - mamy załadowane biblioteki AI i dostęp do kamery użytkownika. Jednak te dwa elementy jeszcze ze sobą nie współpracują.
 
-Potrzebujemy dwóch rzeczy:
+Potrzebujemy:
 
 1. **Detektora** - instancji modelu AI gotowej do analizy
-2. **Strumienia wideo** - dostępu do kamery z rzeczywistymi danymi
+2. **Strumienia wideo** - danych z kamery
 
-Tutaj wkracza funkcja `init()` - ten kod uruchamia się tylko raz, na samym początku, i przygotowuje wszystko do pracy.
+Tu wkracza funkcja `init()` - uruchamia się raz na początku i przygotowuje wszystko.
 
 ## Inicjalizacja detektora
 
-Zanim AI będzie mogło cokolwiek robić, musimy mu "dać instrukcję obsługi" - czyli skonfigurować i uruchomić model.
+Zanim model zacznie działać, musimy go skonfigurować i załadować.
 
-### Co się dzieje za kulisami
+### Asynchroniczność
 
-Funkcja `init()` jest asynchroniczna (`async`). Dlaczego tak? Ponieważ pobieranie modelu z Internetu zajmuje czas - to może być kilkaset megabajtów danych, które musimy ściągnąć z CDN. Nie możemy zablokować cały interfejs czekając - dlatego czekamy "asynchronicznie", czyli robimy coś innego w międzyczasie.
+`init()` jest asynchroniczna, ponieważ pobranie modelu z CDN trwa pewien czas. Nie blokujemy interfejsu - czekamy w tle.
 
-### Kod inicjalizacji
+### Kod
 
 ```typescript
 const init = async () => {
-	// Pobieramy główny obiekt hand-pose-detection z window
 	const hp = window.handPoseDetection;
-
-	// Informujemy system, że chcemy używać MediaPipeHands
-	// (mamy też inne opcje, ale ta jest najlepsza dla przeglądarek)
 	const model = hp.SupportedModels.MediaPipeHands;
 
-	// Tworzymy konfigurację dla modelu
 	const modelConfig: HandPoseDetectionType.MediaPipeHandsMediaPipeModelConfig = {
-		// Używamy oryginalnej implementacji Google
 		runtime: "mediapipe",
-
-		// Adres do pobrania wag modelu - te pliki zawierają "wiedzę" sieci neuronowej
 		solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-
-		// "full" = dokładny model, "lite" = szybszy ale mniej dokładny
-		// Wybieramy full dla najlepszej jakości
 		modelType: "full",
 	};
 
-	// Moment inicjalizacji - tworzymy detektor
-	// await czeka aż model zostanie załadowany z CDN
 	detector = await hp.createDetector(model, modelConfig);
 };
 ```
 
-### Analiza parametrów konfiguracji
+### Parametry konfiguracji
 
-Każdy z tych parametrów wpływa na to, jak będzie działać nasz system.
+- **runtime: "mediapipe"** - optymalizacja pod detekcję dłoni w przeglądarce
+- **solutionPath** - adres do wag modelu na CDN
+- **modelType: "full"** - wyższa dokładność, kilka ms wolniej
 
-**runtime: "mediapipe"**
-
-- MediaPipe to biblioteka Google stworzona specjalnie dla zadań takich jak detekcja dłoni
-- Jest zoptymalizowana pod względem wydajności i dokładności
-- Alternatywy (jak TensorFlow Lite) są wolniejsze
-
-**solutionPath**
-
-- To adres do plików modelu na CDN
-- Pliki zawierają wytrenowaną sieć neuronową - miliardy parametrów nauczonych na miliardach obrazów
-- Bez tego model byłby całkowicie bezużyteczny
-- CDN zapewnia szybkie pobieranie z serwera bliskiego użytkownikowi
-
-**modelType: "full"**
-
-- Pełny model ma więcej warstw neuronowych, potrafi rozpoznać bardziej subtelne szczegóły
-- Lite model byłby szybszy (około 2ms versus około 5ms na klatkę), ale mniej dokładny
-- Wybieramy dokładność - użytkownicy wolą czekać 5ms niż otrzymać złe wyniki
-
-### Co przechowuje zmienna `detector`
-
-Zmienna `detector` to teraz nasza "czarna skrzynka AI". Zawiera:
-
-- Załadowaną sieć neuronową na GPU
-- Metadane o wejściu i wyjściu
-- Funkcję `estimateHands()` do analizy
-
-Będziemy ją używać przez całe życie komponentu - dopóki użytkownik nie zamknie strony.
+Po załadowaniu `detector` zawiera sieć neuronową na GPU i gotową do użycia funkcję `estimateHands()`.
 
 ## Pobieranie strumienia z kamery
 
-Mamy detektora, ale bez danych nie robi nic. Potrzebujemy dostępu do kamery użytkownika.
-
-### Pytanie dla użytkownika
-
-Przeglądarki traktują prywatność serio - nie można po prostu wziąć kamerę bez pozwolenia. Dlatego musimy poprosić:
+Ustawiamy dostęp do kamery:
 
 ```typescript
 const stream = await navigator.mediaDevices.getUserMedia({
-	video: {
-		width: 640,
-		height: 480,
-	},
+	video: { width: 640, height: 480 },
 });
-```
 
-Gdy kod to uruchomi, przeglądarka pokaże dialog "Widzenie_Komputerowe chce dostępu do kamery". Użytkownik może wybrać jaką kamerę (jeśli ma więcej niż jedną) i czy pozwala czy nie.
-
-### Wybór rozdzielczości 640x480
-
-Liczby nie są przypadkowe. Przyjrzyjmy się różnym opcjom:
-
-**640 × 480 to 307.200 pikseli**
-
-- **320 × 240** (76.800 pikseli) - zbyt mało, dłoń byłaby zbyt rozmyta, model nie rozpoznałby palców
-- **1280 × 960** (1.228.800 pikseli) - cztery razy więcej pikseli oznacza cztery razy więcej obliczeń na GPU
-- **640 × 480** - kompromis pomiędzy dokładnością a wydajnością
-
-Przy 60 FPS musimy przetwarzać 640×480×60 = 18 milionów pikseli na sekundę. To znacząca ilość danych. Większa rozdzielczość przekroczyłaby możliwości GPU w telefonach.
-
-### Łączenie streamu z elementem video
-
-```typescript
 if (videoRef.current) {
 	videoRef.current.srcObject = stream;
 }
 ```
 
-`srcObject` to właściwość która mówi elementowi `<video>`: "teraz masz dostęp do tego strumienia z kamery, wyświetl go".
+Element `<video>` wyświetla obraz z kamery w czasie rzeczywistym.
 
-Od tego momentu `videoRef.current` wyświetla obraz z kamery użytkownika w czasie rzeczywistym.
+## Czekanie na dane
 
-## Synchronizacja - czekanie na gotowość
-
-Mamy kamerę i model - ale nie możemy od razu zacząć analizy. Element video musi najpierw załadować dane.
-
-### Problem: Wskazanie na niezaładowane video
-
-Wyobraź sobie, że dzwonimy do lekarza z wiadomością "Przychodzimy do ciebie", ale jedziesz na adres który jeszcze nie istnieje. To spowoduje błąd.
-
-Podobnie, jeśli poprosimy detektora by analizował video, które jeszcze się ładuje, dostaniemy błąd o niezgodnych wymiarach tensora:
-
-```
-DOMException: The image argument is a canvas element with a size of 0x0.
-```
-
-### Sprawdzenie readyState
+Przed analizą musimy upewnić się, że video ma załadowane piksele:
 
 ```typescript
-const isVideoReady = videoRef.current.readyState >= 2;
+const isVideoReady = videoRef.current?.readyState >= 2;
 ```
 
-Wartość `readyState` video mówi nam, gdzie jesteśmy w procesie ładowania:
+`readyState >= 2` oznacza, że dane są dostępne do przetwarzania.
 
-- **0** - `HAVE_NOTHING` - nic jeszcze nie załadowano
-- **1** - `HAVE_METADATA` - znamy rozmiar, ale nie mamy pikseli
-- **2** - `HAVE_CURRENT_DATA` - mamy piksele dla aktualnej klatki (to nam wystarczy)
-- **3** - `HAVE_FUTURE_DATA` - mamy kilka klatek naprzód
-- **4** - `HAVE_ENOUGH_DATA` - gotowy do płynnej odtwarzania
+## Podsumowanie
 
-Czekamy na stan >= 2, co gwarantuje, że możemy czytać piksele z video.
+✓ Detektor załadowany na GPU  
+✓ Strumień wideo ustawiony w elemencie `<video>`  
+✓ Warunek gotowości do czytania danych
 
-## Podsumowanie - co mamy przygotowane
-
-Do tej pory osiągnęliśmy:
-
-✓ **Detektor** - instancja modelu AI załadowana na GPU  
-✓ **Strumień wideo** - dostęp do kamery użytkownika  
-✓ **Wiedza** - rozumienie, jak sprawdzić, czy video ma piksele do analizy
-
-W następnym kroku stworzymy pętlę, która będzie:
-
-1. Czekać aż video jest gotowe (readyState >= 2)
-2. Wysyłać klatkę do detektora
-3. Pobierać wyniki - współrzędne 21 punktów dłoni
-4. Powtarzać to 60 razy na sekundę
-
-To będzie serce naszego systemu - miejsce gdzie wszystko się dzieje.
+Następnie zbudujemy pętlę detekcji - funkcję, która będzie analizować klatkę wideo 60 razy na sekundę i pobierać pozycje 21 punktów kluczowych dłoni.
