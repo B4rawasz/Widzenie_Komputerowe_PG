@@ -1,0 +1,163 @@
+---
+title: "1 - Fundamenty"
+order: 2
+description: "Fundamenty - biblioteki i architektura"
+icon: Ampersands
+---
+
+### Wprowadzenie do potoku przetwarzania
+
+Aby komputer mógł "widzieć" w czasie rzeczywistym w przeglądarce,
+musimy zbudować potok przetwarzania (pipeline),
+który przeniesie obliczenia z powolnego procesora (CPU) na szybką kartę graficzną (GPU).
+
+### Importowanie bibliotek
+
+1. **Silnik Matematyczny (tfjs-core)** To serce obliczeń. W Computer Vision obraz nie jest zdjęciem, lecz tensorem – wielowymiarową macierzą liczb reprezentującą piksele.
+   Ta biblioteka odpowiada za całą matematykę macierzową niezbędną do działania sztucznej inteligencji.
+
+2. **Akcelerator Sprzętowy (tfjs-backend-webgl)** To najważniejszy element wydajności. Przeglądarki internetowe domyślnie używają procesora (CPU), który jest zbyt wolny do przetwarzania 60 klatek na sekundę. Ten moduł tworzy most do karty graficznej (GPU), tłumacząc operacje AI na język shaderów graficznych. Bez tego detekcja działałaby jak pokaz slajdów.
+
+3. **Architektura Modelu (mediapipe/hands)** To "wiedza" systemu. Gotowa, wytrenowana przez Google sieć neuronowa,
+   która zawiera definicję tego, jak wygląda dłoń.
+   Potrafi ona zignorować tło i zwrócić precyzyjne współrzędne stawów, nawet przy trudnym oświetleniu.
+
+4. **Interfejs Detektora (hand-pose-detection)** To warstwa sterująca.
+   Zamiast ręcznie zarządzać przesyłaniem tensora do GPU i obsługą wyników, używamy tej biblioteki jako API. Spina ona powyższe elementy w jedną funkcję, która przyjmuje wideo i zwraca gotowe punkty.
+
+#### Implementacja ładowania
+
+Biblioteki ładujemy przez CDN za pomocą komponentu `Script` z Next.js. Muszą być załadowane w odpowiedniej kolejności:
+
+```tsx
+<Script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></Script>
+<Script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></Script>
+<Script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></Script>
+<Script
+  src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"
+  onReady={() => {
+    setIsLibraryLoaded(true);
+  }}
+/>
+```
+
+Callback `onReady` sygnalizuje, że wszystkie zależności są dostępne i możemy rozpocząć inicjalizację modelu.
+
+### Architektura systemu
+
+System składa się z trzech głównych warstw połączonych w potok przetwarzania:
+
+#### Warstwa wejścia
+
+Kamera użytkownika dostarczająca strumień wideo w czasie rzeczywistym. Element `<video>` odbiera obraz bezpośrednio z `getUserMedia`.
+
+#### Warstwa przetwarzania
+
+Model MediaPipe Hands analizujący każdą klatkę i wykrywający dłonie. Działa na GPU dzięki backendowi WebGL.
+
+#### Warstwa wyjścia
+
+Canvas nakładany na wideo, wizualizujący wykryte punkty kluczowe. Rysuje punkty i połączenia w czasie rzeczywistym.
+
+### Konfiguracja modelu
+
+Model MediaPipe wymaga konfiguracji określającej źródło wag i tryb działania:
+
+```javascript
+const modelConfig = {
+	runtime: "mediapipe",
+	solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+	modelType: "full",
+};
+```
+
+#### Parametry konfiguracji
+
+- **runtime: "mediapipe"** - używamy oryginalnej implementacji Google zamiast alternatywnych backendów
+- **solutionPath** - adres CDN z plikami modelu (wagi sieci neuronowej w formacie binarnym)
+- **modelType: "full"** - pełna wersja modelu (dokładniejsza, ale wolniejsza niż "lite")
+
+#### Tworzenie instancji detektora
+
+Po załadowaniu bibliotek tworzymy instancję detektora:
+
+```typescript
+const hp = window.handPoseDetection;
+const model = hp.SupportedModels.MediaPipeHands;
+
+const modelConfig: HandPoseDetectionType.MediaPipeHandsMediaPipeModelConfig = {
+	runtime: "mediapipe",
+	solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+	modelType: "full",
+};
+
+detector = await hp.createDetector(model, modelConfig);
+```
+
+Funkcja `createDetector` pobiera wagi modelu z CDN i inicjalizuje backend WebGL. Ten proces może zająć kilka sekund przy pierwszym uruchomieniu.
+
+### Struktura danych wyjściowych
+
+Detektor zwraca tablicę obiektów `Hand`, gdzie każda dłoń zawiera:
+
+#### Keypoints 2D
+
+`keypoints` - 21 punktów (x, y) w pikselach canvasa. Współrzędne są względem lewego górnego rogu canvasa.
+
+#### Keypoints 3D
+
+`keypoints3D` - 21 punktów (x, y, z) z informacją o głębi. Współrzędna `z` określa odległość punktu od kamery.
+
+#### Metadane detekcji
+
+- **handedness** - informacja czy to lewa ("Left") czy prawa ("Right") dłoń
+- **score** - pewność detekcji (wartość 0-1, gdzie 1 oznacza 100% pewności)
+
+### Implementacja interfejsu
+
+#### Struktura HTML
+
+Interfejs składa się z dwóch nakładających się elementów:
+
+```tsx
+<div className="relative w-1/2 aspect-4/3">
+	<video
+		ref={videoRef}
+		style={{
+			position: "absolute",
+			transform: "scaleX(-1)",
+		}}
+		playsInline
+		muted
+	/>
+
+	<canvas
+		ref={canvasRef}
+		style={{
+			position: "absolute",
+			transform: "scaleX(-1)",
+		}}
+	/>
+</div>
+```
+
+#### Efekt lustrzany
+
+Oba elementy są odbite lustrzanie (`scaleX(-1)`) dla efektu "selfie mode". Użytkownik widzi siebie jak w lustrze - ruch prawej dłoni pojawia się po prawej stronie ekranu.
+
+#### Pozycjonowanie absolutne
+
+Elementy są nałożone na siebie dzięki `position: absolute`. Video jest warstwą bazową, a canvas rysuje wizualizację na górze.
+
+---
+
+### Co mamy po tym kroku?
+
+Po zakończeniu tego etapu posiadamy kompletną infrastrukturę do detekcji dłoni:
+
+- **Załadowane biblioteki** - TensorFlow.js z akceleracją GPU gotowy do obliczeń tensorowych
+- **Zainicjalizowany model** - MediaPipe Hands pobrany z CDN i gotowy do analizy wideo
+- **Przygotowaną strukturę HTML** - video i canvas skonfigurowane do wizualizacji w czasie rzeczywistym
+- **Dostęp do danych wyjściowych** - 21 punktów kluczowych dla każdej wykrytej dłoni z metadanymi
+
+System jest gotowy do przetwarzania strumienia wideo w czasie rzeczywistym. W kolejnych krokach zaimplementujemy logikę pętli detekcji i algorytmy rysowania punktów kluczowych.
