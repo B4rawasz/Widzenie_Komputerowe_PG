@@ -4,6 +4,7 @@ import type * as HandPoseDetectionType from "@tensorflow-models/hand-pose-detect
 import type { HandDetector } from "@tensorflow-models/hand-pose-detection";
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
+import Cube3D from "./3D/Cube";
 
 declare global {
 	interface Window {
@@ -17,6 +18,10 @@ export default function HandRecognition() {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
+	const [handAngles, setHandAngles] = useState({ yaw: 0, pitch: 0, roll: 0 });
+	const anglesRef = useRef({ yaw: 0, pitch: 0, roll: 0 }); // do wygładzania
+	const [cubeScale, setCubeScale] = useState(1);
+	const scaleRef = useRef(1);
 
 	useEffect(() => {
 		if (!isLibraryLoaded) return;
@@ -105,6 +110,111 @@ export default function HandRecognition() {
 		return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + dz ** 2);
 	};
 
+	// Pomocnicze: normalizacja kąta i najmniejsza różnica kątów
+	const normalizeAngle = (deg: number) => {
+		let a = deg;
+		while (a > 180) a -= 360;
+		while (a < -180) a += 360;
+		return a;
+	};
+	const shortestDelta = (from: number, to: number) => {
+		const df = normalizeAngle(to - from);
+		return df;
+	};
+
+	// --- Stabilne kąty: yaw z normalnej (XZ), roll z osi Y (XY) ---
+	const getHandEulerAngles = (keypoints3D: { x: number; y: number; z?: number }[]) => {
+		const p0 = keypoints3D[0]; // nadgarstek
+		const p5 = keypoints3D[5];
+		const p9 = keypoints3D[9];
+		const p13 = keypoints3D[13];
+		const p17 = keypoints3D[17];
+
+		const palmBase = {
+			x: (p5.x + p9.x + p13.x + p17.x) / 4,
+			y: (p5.y + p9.y + p13.y + p17.y) / 4,
+			z: ((p5.z ?? 0) + (p9.z ?? 0) + (p13.z ?? 0) + (p17.z ?? 0)) / 4,
+		};
+
+		// Oś Y dłoni (wrist -> palm base)
+		const y = { x: palmBase.x - p0.x, y: palmBase.y - p0.y, z: palmBase.z - (p0.z ?? 0) };
+		const yLen = Math.hypot(y.x, y.y, y.z);
+		const yNorm = { x: y.x / yLen, y: y.y / yLen, z: y.z / yLen };
+
+		// Oś X dłoni (p5 -> p17)
+		const x = { x: p17.x - p5.x, y: p17.y - p5.y, z: (p17.z ?? 0) - (p5.z ?? 0) };
+		const xLen = Math.hypot(x.x, x.y, x.z);
+		const xNorm = { x: x.x / xLen, y: x.y / xLen, z: x.z / xLen };
+
+		// Normalna dłoni
+		let zNorm = {
+			x: xNorm.y * yNorm.z - xNorm.z * yNorm.y,
+			y: xNorm.z * yNorm.x - xNorm.x * yNorm.z,
+			z: xNorm.x * yNorm.y - xNorm.y * yNorm.x,
+		};
+		const zLen = Math.hypot(zNorm.x, zNorm.y, zNorm.z);
+		zNorm = { x: zNorm.x / zLen, y: zNorm.y / zLen, z: zNorm.z / zLen };
+
+		const isMirrored = true;
+
+		// Yaw: 0 przodem, ~180 tyłem
+		let yaw = Math.atan2(zNorm.x, -zNorm.z) * (180 / Math.PI);
+		if (isMirrored) yaw = -yaw;
+		yaw = normalizeAngle(yaw + 180);
+		yaw = Math.abs(yaw); // [0,180]
+
+		// Pitch: odwrócony znak (zgodnie z oczekiwaniem)
+		let pitch = -Math.atan2(zNorm.y, Math.hypot(zNorm.x, zNorm.z)) * (180 / Math.PI);
+
+		// Roll: 0 gdy palce są do góry; dodatni dla obrotu zgodnego z ekranem
+		// kąt między wektorem "góra ekranu" (0, -1) a osią Y dłoni po projekcji na XY
+		let roll = Math.atan2(yNorm.x, -yNorm.y) * (180 / Math.PI);
+		// przy lustrzanym obrazie (scaleX(-1)) odwróć znak
+
+		return {
+			yaw,
+			pitch: Math.abs(pitch) < 1e-6 ? 0 : pitch,
+			roll: normalizeAngle(Math.abs(roll) < 1e-6 ? 0 : roll),
+		};
+	};
+
+	// --- ADAPTACYJNE WYGŁADZANIE + deadband + ochrona przed outlierami ---
+	const smoothAngles = (newAngles: { yaw: number; pitch: number; roll: number }, alphaScale = 1) => {
+		const prev = anglesRef.current;
+
+		const smoothOne = (prevVal: number, newVal: number) => {
+			let d = shortestDelta(prevVal, newVal);
+			const ad = Math.abs(d);
+
+			// deadband
+			if (ad < 0.5) return prevVal;
+			// outlier guard
+			if (ad > 40) d = Math.sign(d) * 40;
+
+			// adaptacyjne alpha, skalowane przez alphaScale
+			let alpha = (0.05 + 0.45 * Math.min(1, ad / 30)) * alphaScale;
+			alpha = Math.max(0, Math.min(1, alpha));
+
+			const blended = prevVal + alpha * d;
+			return normalizeAngle(blended);
+		};
+
+		const smoothed = {
+			yaw: smoothOne(prev.yaw, newAngles.yaw),
+			pitch: smoothOne(prev.pitch, newAngles.pitch),
+			roll: smoothOne(prev.roll, newAngles.roll),
+		};
+		anglesRef.current = smoothed;
+		return smoothed;
+	};
+
+	const smoothScale = (newScale: number, alpha = 0.2) => {
+		const prev = scaleRef.current;
+		const smoothed = alpha * newScale + (1 - alpha) * prev;
+		scaleRef.current = smoothed;
+		return smoothed;
+	};
+
 	const drawHands = (hands: HandPoseDetectionType.Hand[], canvas: HTMLCanvasElement) => {
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
@@ -188,6 +298,8 @@ export default function HandRecognition() {
 
 					const normalized = (distance - minDistance) / (maxDistance - minDistance);
 					const clamped = Math.max(0, Math.min(1, normalized)); // zawsze w [0,1]
+					const smoothedScale = smoothScale(clamped, 0.2);
+					setCubeScale(smoothedScale);
 
 					// Środek linii w 2D
 					const midX = (thumbTip2D.x + indexTip2D.x) / 2;
@@ -209,7 +321,19 @@ export default function HandRecognition() {
 			}
 
 			if (hand.handedness === "Left" && hand.keypoints3D) {
-				console.log(hand.keypoints3D);
+				const rawAngles = getHandEulerAngles(hand.keypoints3D);
+				const { yaw, pitch, roll } = smoothAngles(rawAngles, 0.2); // alpha=0.2, im mniejsze tym większe wygładzenie
+				setHandAngles({ yaw, pitch, roll });
+				const wrist = hand.keypoints[0];
+				ctx.save();
+				ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
+				ctx.font = "18px Arial";
+				ctx.fillStyle = "yellow";
+				ctx.textAlign = "center";
+				ctx.fillText(`Yaw: ${yaw.toFixed(0)}°`, canvas.width - wrist.x, wrist.y - 40);
+				ctx.fillText(`Pitch: ${pitch.toFixed(0)}°`, canvas.width - wrist.x, wrist.y - 20);
+				ctx.fillText(`Roll: ${roll.toFixed(0)}°`, canvas.width - wrist.x, wrist.y);
+				ctx.restore();
 			}
 		});
 	};
@@ -269,6 +393,9 @@ export default function HandRecognition() {
 						Ładowanie modelu...
 					</div>
 				)}
+			</div>
+			<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+				<Cube3D yaw={handAngles.yaw} pitch={handAngles.pitch} roll={handAngles.roll} scale={cubeScale * 20} />
 			</div>
 			<div>Hand Detection Module</div>
 		</>
