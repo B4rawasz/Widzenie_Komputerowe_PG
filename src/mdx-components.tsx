@@ -1,5 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import { Heading } from "@/components/mdx/custom-headings";
+import { PreWrapper } from "./components/mdx/code-coppy";
 
 const components: MDXComponents = {};
 
@@ -11,6 +12,7 @@ export function useMDXComponents(): MDXComponents {
 		h4: (props) => <Heading level={4} {...props} />,
 		h5: (props) => <Heading level={5} {...props} />,
 		h6: (props) => <Heading level={6} {...props} />,
+		pre: (props) => <PreWrapper {...props} />,
 		...components,
 	};
 }
