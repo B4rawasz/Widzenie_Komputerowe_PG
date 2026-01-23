@@ -17,6 +17,7 @@ export default function HandRecognition() {
 	const initialized = useRef(false);
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const streamRef = useRef<MediaStream | null>(null);
 	const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
 	const [handAngles, setHandAngles] = useState({ yaw: 0, pitch: 0, roll: 0 });
 	const anglesRef = useRef({ yaw: 0, pitch: 0, roll: 0 }); // do wygładzania
@@ -57,6 +58,8 @@ export default function HandRecognition() {
 				const stream = await navigator.mediaDevices.getUserMedia({
 					video: { width: 640, height: 480 }, // Wymuszamy rozmiar dla łatwiejszego mapowania
 				});
+
+				streamRef.current = stream;
 
 				if (videoRef.current) {
 					videoRef.current.srcObject = stream;
@@ -101,6 +104,16 @@ export default function HandRecognition() {
 		return () => {
 			if (animationFrameId) cancelAnimationFrame(animationFrameId);
 			if (detector) detector.dispose();
+			// Zatrzymaj strumień kamery
+			if (streamRef.current) {
+				streamRef.current.getTracks().forEach((track) => track.stop());
+				streamRef.current = null;
+			}
+
+			// Wyczyść srcObject
+			if (videoRef.current) {
+				videoRef.current.srcObject = null;
+			}
 			initialized.current = false;
 		};
 	}, [isLibraryLoaded]);
