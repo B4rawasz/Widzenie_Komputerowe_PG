@@ -4,7 +4,7 @@ import type * as HandPoseDetectionType from "@tensorflow-models/hand-pose-detect
 import type { HandDetector } from "@tensorflow-models/hand-pose-detection";
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
-import Cube3D from "./3D/Cube";
+import Laptop3D from "./3D/Model";
 
 declare global {
 	interface Window {
@@ -14,29 +14,29 @@ declare global {
 }
 
 export default function HandRecognition() {
-	const initialized = useRef(false);
-	const videoRef = useRef<HTMLVideoElement>(null);
-	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const streamRef = useRef<MediaStream | null>(null);
-	const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
-	const [handAngles, setHandAngles] = useState({ yaw: 0, pitch: 0, roll: 0 });
-	const anglesRef = useRef({ yaw: 0, pitch: 0, roll: 0 }); // do wygładzania
-	const [cubeScale, setCubeScale] = useState(1);
-	const scaleRef = useRef(1);
+	const initialized = useRef(false); //check if already initialized
+	const videoRef = useRef<HTMLVideoElement>(null); //video element
+	const canvasRef = useRef<HTMLCanvasElement>(null); //canvas for drawing
+	const streamRef = useRef<MediaStream | null>(null); //media stream
+	const [isLibraryLoaded, setIsLibraryLoaded] = useState(false); //loading state
+	const [handAngles, setHandAngles] = useState({ yaw: 0, pitch: 0, roll: 0 }); //hand angles state
+	const anglesRef = useRef({ yaw: 0, pitch: 0, roll: 0 }); //for smoothing
+	const [cubeScale, setCubeScale] = useState(1); //cube scale state
+	const scaleRef = useRef(1); //for smoothing
 
 	useEffect(() => {
-		if (!isLibraryLoaded) return;
+		if (!isLibraryLoaded) return; // wait until library is loaded
 
-		if (initialized.current) return;
+		if (initialized.current) return; // already initialized
 		initialized.current = true;
 
 		let detector: HandDetector;
 		let animationFrameId: number;
 
+		// Model initialization
 		const init = async () => {
-			const hp = window.handPoseDetection;
+			const hp = window.handPoseDetection; // hand pose detection library
 
-			// Teraz to nie powinno się wydarzyć, bo czekamy na isLibraryLoaded
 			if (!hp) {
 				console.error("Hand pose detection library not found on window");
 				return;
@@ -46,7 +46,7 @@ export default function HandRecognition() {
 
 			const model = hp.SupportedModels.MediaPipeHands;
 			const modelConfig: HandPoseDetectionType.MediaPipeHandsMediaPipeModelConfig = {
-				runtime: "mediapipe",
+				runtime: "mediapipe", // mediapipe for native performance
 				solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
 				modelType: "full",
 			};
@@ -56,7 +56,8 @@ export default function HandRecognition() {
 				console.log("Detector created!");
 
 				const stream = await navigator.mediaDevices.getUserMedia({
-					video: { width: 640, height: 480 }, // Wymuszamy rozmiar dla łatwiejszego mapowania
+					video: { width: 640, height: 480 }, // set desired video resolution
+					audio: false,
 				});
 
 				streamRef.current = stream;
@@ -79,69 +80,73 @@ export default function HandRecognition() {
 			}
 		};
 
+		// Detection loop
 		const detect = async () => {
-			if (!videoRef.current || !detector || !canvasRef.current) return;
+			if (!videoRef.current || !detector || !canvasRef.current) return; // safety check
 
-			// Czekamy aż wideo będzie miało dane, inaczej TF rzuca błędami o kształcie tensora
+			// Wait until video is ready, otherwise TF throws shape errors
 			if (videoRef.current.readyState < 2) {
 				animationFrameId = requestAnimationFrame(detect);
 				return;
 			}
 
 			try {
-				const hands = await detector.estimateHands(videoRef.current);
-				drawHands(hands, canvasRef.current);
+				const hands = await detector.estimateHands(videoRef.current); // detect hands
+				drawHands(hands, canvasRef.current); // draw results
 			} catch (error) {
 				console.error(error);
 			}
 
-			animationFrameId = requestAnimationFrame(detect);
+			animationFrameId = requestAnimationFrame(detect); // continue the loop
 		};
 
 		init();
 
-		// Cleanup przy odmontowaniu
+		// Cleanup
 		return () => {
 			if (animationFrameId) cancelAnimationFrame(animationFrameId);
 			if (detector) detector.dispose();
-			// Zatrzymaj strumień kamery
+			// Stop media stream
 			if (streamRef.current) {
 				streamRef.current.getTracks().forEach((track) => track.stop());
 				streamRef.current = null;
 			}
-
-			// Wyczyść srcObject
+			// Clear video srcObject
 			if (videoRef.current) {
 				videoRef.current.srcObject = null;
 			}
+
 			initialized.current = false;
 		};
 	}, [isLibraryLoaded]);
 
+	// 3D distance helper
 	const getDistance = (a: { x: number; y: number; z?: number }, b: { x: number; y: number; z?: number }) => {
 		const dz = (a.z ?? 0) - (b.z ?? 0);
 		return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + dz ** 2);
 	};
 
-	// Pomocnicze: normalizacja kąta i najmniejsza różnica kątów
+	// Helpers: angle normalization and shortest angle difference
 	const normalizeAngle = (deg: number) => {
 		let a = deg;
 		while (a > 180) a -= 360;
 		while (a < -180) a += 360;
 		return a;
 	};
+
+	// shortest difference from "from" to "to"
 	const shortestDelta = (from: number, to: number) => {
 		const df = normalizeAngle(to - from);
 		return df;
 	};
 
-	// --- Stabilne kąty: yaw z normalnej (XZ), roll z osi Y (XY) ---
+	// Stable angles: yaw from normal (XZ), roll from Y axis (XY) pitch from normal (YZ)
 	const getHandEulerAngles = (keypoints3D: { x: number; y: number; z?: number }[]) => {
-		const p0 = keypoints3D[0]; // nadgarstek
-		const p5 = keypoints3D[5];
-		const p9 = keypoints3D[9];
-		const p13 = keypoints3D[13];
-		const p17 = keypoints3D[17];
+		const p0 = keypoints3D[0]; // wrist
+		const p5 = keypoints3D[5]; // base of index finger
+		const p9 = keypoints3D[9]; // base of middle finger
+		const p13 = keypoints3D[13]; // base of ring finger
+		const p17 = keypoints3D[17]; // base of pinky finger
 
 		const palmBase = {
 			x: (p5.x + p9.x + p13.x + p17.x) / 4,
@@ -149,40 +154,40 @@ export default function HandRecognition() {
 			z: ((p5.z ?? 0) + (p9.z ?? 0) + (p13.z ?? 0) + (p17.z ?? 0)) / 4,
 		};
 
-		// Oś Y dłoni (wrist -> palm base)
+		// Y axis of the hand (wrist -> palm base)
 		const y = { x: palmBase.x - p0.x, y: palmBase.y - p0.y, z: palmBase.z - (p0.z ?? 0) };
 		const yLen = Math.hypot(y.x, y.y, y.z);
 		const yNorm = { x: y.x / yLen, y: y.y / yLen, z: y.z / yLen };
 
-		// Oś X dłoni (p5 -> p17)
+		// X axis of the hand (p5 -> p17)
 		const x = { x: p17.x - p5.x, y: p17.y - p5.y, z: (p17.z ?? 0) - (p5.z ?? 0) };
 		const xLen = Math.hypot(x.x, x.y, x.z);
 		const xNorm = { x: x.x / xLen, y: x.y / xLen, z: x.z / xLen };
 
-		// Normalna dłoni
+		// Normal of the hand
 		let zNorm = {
 			x: xNorm.y * yNorm.z - xNorm.z * yNorm.y,
 			y: xNorm.z * yNorm.x - xNorm.x * yNorm.z,
 			z: xNorm.x * yNorm.y - xNorm.y * yNorm.x,
 		};
+
 		const zLen = Math.hypot(zNorm.x, zNorm.y, zNorm.z);
 		zNorm = { x: zNorm.x / zLen, y: zNorm.y / zLen, z: zNorm.z / zLen };
 
 		const isMirrored = true;
 
-		// Yaw: 0 przodem, ~180 tyłem
+		// Yaw: 0 front, ~180 back
 		let yaw = Math.atan2(zNorm.x, -zNorm.z) * (180 / Math.PI);
 		if (isMirrored) yaw = -yaw;
 		yaw = normalizeAngle(yaw + 180);
 		yaw = Math.abs(yaw); // [0,180]
 
-		// Pitch: odwrócony znak (zgodnie z oczekiwaniem)
+		// Pitch: inverted sign
 		let pitch = -Math.atan2(zNorm.y, Math.hypot(zNorm.x, zNorm.z)) * (180 / Math.PI);
 
-		// Roll: 0 gdy palce są do góry; dodatni dla obrotu zgodnego z ekranem
-		// kąt między wektorem "góra ekranu" (0, -1) a osią Y dłoni po projekcji na XY
+		// Roll: 0 when fingers are up; positive for clockwise rotation
+		// angle between "screen up" vector (0, -1) and hand Y axis projected on XY
 		let roll = Math.atan2(yNorm.x, -yNorm.y) * (180 / Math.PI);
-		// przy lustrzanym obrazie (scaleX(-1)) odwróć znak
 
 		return {
 			yaw,
@@ -191,7 +196,7 @@ export default function HandRecognition() {
 		};
 	};
 
-	// --- ADAPTACYJNE WYGŁADZANIE + deadband + ochrona przed outlierami ---
+	// ADAPTIVE SMOOTHING + deadband + outlier protection
 	const smoothAngles = (newAngles: { yaw: number; pitch: number; roll: number }, alphaScale = 1) => {
 		const prev = anglesRef.current;
 
@@ -204,7 +209,7 @@ export default function HandRecognition() {
 			// outlier guard
 			if (ad > 40) d = Math.sign(d) * 40;
 
-			// adaptacyjne alpha, skalowane przez alphaScale
+			// adaptive alpha, scaled by alphaScale
 			let alpha = (0.05 + 0.45 * Math.min(1, ad / 30)) * alphaScale;
 			alpha = Math.max(0, Math.min(1, alpha));
 
@@ -232,39 +237,39 @@ export default function HandRecognition() {
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
-		// Czyścimy poprzednią klatkę
+		// Clear the previous frame
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		ctx.fillStyle = "red";
 		ctx.strokeStyle = "white";
 		ctx.lineWidth = 2;
 
-		// Definicje połączeń palców (pary indeksów punktów)
+		// Definitions of finger connections (pairs of point indices)
 		const fingerJoints = [
 			[0, 1],
 			[1, 2],
 			[2, 3],
-			[3, 4], // Kciuk
+			[3, 4], // Thumb
 			[0, 5],
 			[5, 6],
 			[6, 7],
-			[7, 8], // Wskazujący
+			[7, 8], // Index
 			[0, 9],
 			[9, 10],
 			[10, 11],
-			[11, 12], // Środkowy
+			[11, 12], // Middle
 			[0, 13],
 			[13, 14],
 			[14, 15],
-			[15, 16], // Serdeczny
+			[15, 16], // Ring
 			[0, 17],
 			[17, 18],
 			[18, 19],
-			[19, 20], // Mały
+			[19, 20], // Pinky
 		];
 
 		hands.forEach((hand) => {
-			// 1. Rysowanie połączeń (linii)
+			// 1. Drawing connections (lines)
 			fingerJoints.forEach(([startIdx, endIdx]) => {
 				const start = hand.keypoints[startIdx];
 				const end = hand.keypoints[endIdx];
@@ -291,13 +296,14 @@ export default function HandRecognition() {
 				ctx.stroke();
 			});
 
-			// 2. Rysowanie punktów (kropek)
+			// 2. Drawing points (dots)
 			hand.keypoints.forEach((keypoint) => {
 				ctx.beginPath();
 				ctx.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
 				ctx.fill();
 			});
 
+			// 3. Scale calculation for right hand (thumb-index distance)
 			if (hand.handedness === "Right" && hand.keypoints3D) {
 				const thumbTip = hand.keypoints3D[4];
 				const indexTip = hand.keypoints3D[8];
@@ -310,20 +316,20 @@ export default function HandRecognition() {
 					const maxDistance = 12.0;
 
 					const normalized = (distance - minDistance) / (maxDistance - minDistance);
-					const clamped = Math.max(0, Math.min(1, normalized)); // zawsze w [0,1]
+					const clamped = Math.max(0, Math.min(1, normalized)); // always in [0,1]
 					const smoothedScale = smoothScale(clamped, 0.2);
 					setCubeScale(smoothedScale);
 
-					// Środek linii w 2D
+					// Center of the line in 2D
 					const midX = (thumbTip2D.x + indexTip2D.x) / 2;
 					const midY = (thumbTip2D.y + indexTip2D.y) / 2;
 					const angle = Math.atan2(indexTip2D.y - thumbTip2D.y, indexTip2D.x - thumbTip2D.x);
 
-					// Wyświetlenie odległości na canvasie
+					// Displaying the distance on the canvas
 					ctx.save();
-					ctx.setTransform(-1, 0, 0, 1, canvas.width, 0); // Odwrócenie X
-					ctx.translate(canvas.width - midX, midY - 10); // Przesunięcie do środka linii
-					ctx.rotate(-angle); // Rotacja tekstu (minus, bo canvas jest odbity)
+					ctx.setTransform(-1, 0, 0, 1, canvas.width, 0); // Mirror for right hand
+					ctx.translate(canvas.width - midX, midY - 10); // Midpoint position
+					ctx.rotate(-angle); // Rotation of text (negative because canvas is mirrored)
 					ctx.font = "24px Arial";
 					ctx.fillStyle = "green";
 					ctx.textAlign = "center";
@@ -335,7 +341,7 @@ export default function HandRecognition() {
 
 			if (hand.handedness === "Left" && hand.keypoints3D) {
 				const rawAngles = getHandEulerAngles(hand.keypoints3D);
-				const { yaw, pitch, roll } = smoothAngles(rawAngles, 0.2); // alpha=0.2, im mniejsze tym większe wygładzenie
+				const { yaw, pitch, roll } = smoothAngles(rawAngles, 0.2); // alpha=0.2, the smaller the smoother
 				setHandAngles({ yaw, pitch, roll });
 				const wrist = hand.keypoints[0];
 				ctx.save();
@@ -362,55 +368,24 @@ export default function HandRecognition() {
 				}}
 			/>
 
-			<div className="relative w-1/2 aspect-4/3">
-				{/* Wideo pod spodem */}
-				<video
-					ref={videoRef}
-					style={{
-						position: "absolute",
-						top: 0,
-						left: 0,
-						width: "100%",
-						height: "100%",
-						transform: "scaleX(-1)",
-					}}
-					playsInline
-					muted
+			<div className="grid grid-cols-2 gap-4 my-6">
+				<div className="relative w-full aspect-4/3 rounded-md overflow-hidden">
+					{/* Video element for webcam feed */}
+					<video ref={videoRef} className="absolute top-0 left-0 w-full h-full scale-x-[-1]" playsInline muted />
+					{/* Canvas for drawing hand landmarks */}
+					<canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full scale-x-[-1]" />
+					{/* Loading indicator */}
+					{!isLibraryLoaded && <div className="absolute top-1/2 left-1/2 translate-[-50%]">Ładowanie modelu...</div>}
+				</div>
+				{/* 3D Laptop Model */}
+				<Laptop3D
+					yaw={handAngles.yaw}
+					pitch={handAngles.pitch}
+					roll={handAngles.roll}
+					scale={cubeScale * 15}
+					className="bg-card aspect-4/3 rounded-md"
 				/>
-
-				{/* Canvas na wierzchu */}
-				<canvas
-					ref={canvasRef}
-					style={{
-						position: "absolute",
-						top: 0,
-						left: 0,
-						width: "100%",
-						height: "100%",
-						transform: "scaleX(-1)", // Canvas też musimy odwrócić, żeby pasował do wideo
-					}}
-				/>
-
-				{!isLibraryLoaded && (
-					<div
-						style={{
-							position: "absolute",
-							top: "50%",
-							left: "50%",
-							transform: "translate(-50%, -50%)",
-							color: "white",
-							background: "rgba(0,0,0,0.7)",
-							padding: "10px",
-						}}
-					>
-						Ładowanie modelu...
-					</div>
-				)}
 			</div>
-			<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-				<Cube3D yaw={handAngles.yaw} pitch={handAngles.pitch} roll={handAngles.roll} scale={cubeScale * 20} />
-			</div>
-			<div>Hand Detection Module</div>
 		</>
 	);
 }
