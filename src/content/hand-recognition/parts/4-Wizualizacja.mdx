@@ -1,0 +1,202 @@
+---
+title: "4 - Wizualizacja"
+order: 5
+description: "Rysowanie szkieletu dłoni na canvasie"
+icon: Palette
+---
+
+## Od danych do obrazu
+
+Mamy współrzędne 21 punktów dłoni, ale użytkownik nie widzi liczb. Musimy to zwizualizować - narysować punkty i połączenia na canvasie.
+
+Canvas to element HTML, na którym możemy rysować za pomocą JavaScript. Rysujemy na nim każdą klatkę od zera - to dlatego najpierw czyścimy poprzednią zawartość.
+
+## Przygotowanie canvasa
+
+Zanim cokolwiek narysujemy, musimy przygotować canvas do pracy.
+
+### Czyszczenie canvasa
+
+Zanim cokolwiek narysujemy, musimy usunąć zawartość z poprzedniej klatki:
+
+```typescript
+const ctx = canvas.getContext("2d");
+if (!ctx) return;
+
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+```
+
+`getContext("2d")` daje nam dostęp do narzędzi do rysowania.
+
+`clearRect()` resetuje cały canvas do stanu przezroczystego. Bez tego punkty z poprzednich klatek zostałyby widoczne - efekt smugi.
+
+### Ustawienie stylu rysowania
+
+```typescript
+ctx.fillStyle = "red";
+ctx.strokeStyle = "white";
+ctx.lineWidth = 2;
+```
+
+- **fillStyle** - kolor wypełnienia (dla kół - punktów)
+- **strokeStyle** - kolor obrysu (dla linii)
+- **lineWidth** - grubość linii w pikselach
+
+## Struktura dłoni
+
+Detektor zwraca 21 punktów numerowanych od 0 do 20. Oto ich organizacja:
+
+```typescript
+const fingerJoints = [
+	[0, 1],
+	[1, 2],
+	[2, 3],
+	[3, 4], // Kciuk
+	[0, 5],
+	[5, 6],
+	[6, 7],
+	[7, 8], // Palec wskazujący
+	[0, 9],
+	[9, 10],
+	[10, 11],
+	[11, 12], // Palec środkowy
+	[0, 13],
+	[13, 14],
+	[14, 15],
+	[15, 16], // Palec serdeczny
+	[0, 17],
+	[17, 18],
+	[18, 19],
+	[19, 20], // Mały palec
+];
+```
+
+Każda para to dwa punkty, które powinny być połączone linią. Punkt 0 to nadgarstek - centrum dłoni, od którego rozchodzą się wszystkie palce.
+
+## Rysowanie
+
+Musimy narysować zarówno strukturę (linie), jak i punkty charakterystyczne.
+
+### Linie między punktami
+
+Najpierw rysujemy strukturę - linie łączące stawy:
+
+```typescript
+fingerJoints.forEach(([startIdx, endIdx]) => {
+	const start = hand.keypoints[startIdx];
+	const end = hand.keypoints[endIdx];
+
+	ctx.beginPath();
+	ctx.moveTo(start.x, start.y);
+	ctx.lineTo(end.x, end.y);
+	ctx.stroke();
+});
+```
+
+- **beginPath()** - rozpoczyna nową ścieżkę
+- **moveTo()** - ustawia punkt początkowy
+- **lineTo()** - rysuje linię do punktu końcowego
+- **stroke()** - faktycznie renderuje linię
+
+Każda linia łączy dwa sąsiednie stawy palca.
+
+### Punkty kluczowe
+
+Teraz zaznaczamy każdy staw małym kółkiem:
+
+```typescript
+hand.keypoints.forEach((keypoint) => {
+	ctx.beginPath();
+	ctx.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
+	ctx.fill();
+});
+```
+
+- **arc()** - rysuje okrąg o promieniu 4 piksele
+- Argument `2 * Math.PI` to pełny okrąg w radianach
+- **fill()** - wypełnia okrąg kolorem z `fillStyle`
+
+Rezultat: 21 małych kropek połączonych liniami - szkielet dłoni.
+
+## Rozróżnianie lewej i prawej dłoni
+
+Model zwraca informację, która to dłoń:
+
+```typescript
+if (hand.handedness === "Right") {
+	ctx.fillStyle = "blue";
+} else {
+	ctx.fillStyle = "red";
+}
+```
+
+Przed rysowaniem punktów zmieniamy `fillStyle` na podstawie `handedness`. Prawa dłoń będzie niebieska, lewa czerwona.
+
+To ułatwia rozpoznanie, gdy obie dłonie są widoczne.
+
+## Pełna funkcja drawHands()
+
+```typescript
+const drawHands = (hands: HandPoseDetectionType.Hand[], canvas: HTMLCanvasElement) => {
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	hands.forEach((hand) => {
+		// Ustawiamy kolor na podstawie handedness
+		if (hand.handedness === "Right") {
+			ctx.fillStyle = "blue";
+		} else {
+			ctx.fillStyle = "red";
+		}
+
+		ctx.strokeStyle = "white";
+		ctx.lineWidth = 2;
+
+		// Rysujemy linie
+		fingerJoints.forEach(([startIdx, endIdx]) => {
+			const start = hand.keypoints[startIdx];
+			const end = hand.keypoints[endIdx];
+
+			ctx.beginPath();
+			ctx.moveTo(start.x, start.y);
+			ctx.lineTo(end.x, end.y);
+			ctx.stroke();
+		});
+
+		// Rysujemy punkty
+		hand.keypoints.forEach((keypoint) => {
+			ctx.beginPath();
+			ctx.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
+			ctx.fill();
+		});
+	});
+};
+```
+
+### Iteracja po więcej niż jednej dłoni
+
+`hands` to tablica - może zawierać 0, 1 lub 2 dłonie. Pętla `forEach` automatycznie obsługuje każdy przypadek.
+
+Każda dłoń rysowana jest ze swoim kolorem i pozycją.
+
+### Kolejność rysowania
+
+Ważne jest rysować w tej kolejności:
+
+1. Czyścimy canvas
+2. Rysujemy linie
+3. Rysujemy punkty
+
+Jeśli rysujemy punkty pierwsze, linie je przykryją.
+
+## Podsumowanie
+
+✓ Czyszczenie canvasa co klatkę  
+✓ `fingerJoints` definiuje strukturę dłoni  
+✓ Linie łączą sąsiednie stawy  
+✓ Punkty zaznaczają pozycje stawów  
+✓ Rozróżnianie kolorów dla lewej i prawej dłoni
+
+W następnym kroku nauczymy się mierzyć odległości między punktami i wykorzystywać je do detekcji gestów.

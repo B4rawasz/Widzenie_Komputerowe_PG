@@ -1,0 +1,84 @@
+---
+title: "2 - Kamera i Detektor"
+order: 3
+description: "Inicjalizacja kamery i detektora dłoni"
+icon: Camera
+---
+
+## Od teorii do praktyki
+
+W poprzednim kroku przygotowaliśmy fundamenty - mamy załadowane biblioteki AI i dostęp do kamery użytkownika. Jednak te dwa elementy jeszcze ze sobą nie współpracują.
+
+Potrzebujemy:
+
+1. **Detektora** - instancji modelu AI gotowej do analizy
+2. **Strumienia wideo** - danych z kamery
+
+Tu wkracza funkcja `init()` - uruchamia się raz na początku i przygotowuje wszystko.
+
+## Inicjalizacja detektora
+
+Zanim model zacznie działać, musimy go skonfigurować i załadować.
+
+### Asynchroniczność
+
+`init()` jest asynchroniczna, ponieważ pobranie modelu z CDN trwa pewien czas. Nie blokujemy interfejsu - czekamy w tle.
+
+### Kod
+
+```typescript
+const init = async () => {
+	const hp = window.handPoseDetection;
+	const model = hp.SupportedModels.MediaPipeHands;
+
+	const modelConfig: HandPoseDetectionType.MediaPipeHandsMediaPipeModelConfig = {
+		runtime: "mediapipe",
+		solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+		modelType: "full",
+	};
+
+	detector = await hp.createDetector(model, modelConfig);
+};
+```
+
+### Parametry konfiguracji
+
+- **runtime: "mediapipe"** - optymalizacja pod detekcję dłoni w przeglądarce
+- **solutionPath** - adres do wag modelu na CDN
+- **modelType: "full"** - wyższa dokładność, kilka ms wolniej
+
+Po załadowaniu `detector` zawiera sieć neuronową na GPU i gotową do użycia funkcję `estimateHands()`.
+
+## Pobieranie strumienia z kamery
+
+Ustawiamy dostęp do kamery:
+
+```typescript
+const stream = await navigator.mediaDevices.getUserMedia({
+	video: { width: 640, height: 480 },
+});
+
+if (videoRef.current) {
+	videoRef.current.srcObject = stream;
+}
+```
+
+Element `<video>` wyświetla obraz z kamery w czasie rzeczywistym.
+
+## Czekanie na dane
+
+Przed analizą musimy upewnić się, że video ma załadowane piksele:
+
+```typescript
+const isVideoReady = videoRef.current?.readyState >= 2;
+```
+
+`readyState >= 2` oznacza, że dane są dostępne do przetwarzania.
+
+## Podsumowanie
+
+✓ Detektor załadowany na GPU  
+✓ Strumień wideo ustawiony w elemencie `<video>`  
+✓ Warunek gotowości do czytania danych
+
+Następnie zbudujemy pętlę detekcji - funkcję, która będzie analizować klatkę wideo 60 razy na sekundę i pobierać pozycje 21 punktów kluczowych dłoni.

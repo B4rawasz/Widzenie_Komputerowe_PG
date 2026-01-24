@@ -1,0 +1,243 @@
+---
+title: "5 - Gesty i Pomiary"
+order: 6
+description: "Detekcja gestów i obliczanie odległości 3D"
+icon: HandMetal
+---
+
+## Od wizualizacji do interakcji
+
+Do tej pory rysujemy szkielet dłoni. Teraz nauczymy się tego, czego AI naprawdę potrafi - rozpoznawania gestów i mierzenia rzeczywistych odległości między palcami.
+
+Gesty to nie tylko wizualizacja - to sposób aby użytkownik sterował aplikacją. Gdy rozumiemy pozycję każdego palca, możemy wykryć szczypanie, zaciśnięcie pięści, albo rozłożone palce.
+
+## Matematyka - obliczanie odległości 3D
+
+Współrzędne (x, y) wskazują pozycję na ekranie. Współrzędna z to głębia - odległość od kamery. Razem tworzą przestrzeń 3D.
+
+### Funkcja getDistance()
+
+Obliczamy dystans między dwoma punktami w przestrzeni 3D:
+
+```typescript
+const getDistance = (a: { x: number; y: number; z?: number }, b: { x: number; y: number; z?: number }) => {
+	const dz = (a.z ?? 0) - (b.z ?? 0);
+	return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + dz ** 2);
+};
+```
+
+To wzór z geometrii przestrzennej: `d = √[(x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²]`
+
+Operator `??` to nullish coalescing - jeśli `z` nie istnieje, przyjmujemy 0.
+
+### Zastosowanie
+
+```typescript
+const thumbTip = hand.keypoints3D[4]; // Opuszka kciuka
+const indexTip = hand.keypoints3D[8]; // Opuszka wskazującego
+
+const distance = getDistance(thumbTip, indexTip);
+```
+
+## Detekcja gestu szczypania
+
+Szczypanie (pinch gesture) to przybliżenie kciuka do palca wskazującego. Mierzymy dystans między nimi i sprawdzamy, czy jest mały.
+
+### Pobieranie punktów
+
+Opuszki palców to ostatnie punkty każdego palca:
+
+- Punkt 4 - opuszka kciuka
+- Punkt 8 - opuszka palca wskazującego
+
+Inne palce byłyby 12, 16, 20, ale zaczynamy od najprostszego - szczypania.
+
+### Implementacja detekcji
+
+```typescript
+if (hand.handedness === "Right" && hand.keypoints3D) {
+	const thumbTip = hand.keypoints3D[4];
+	const indexTip = hand.keypoints3D[8];
+
+	const distance = getDistance(thumbTip, indexTip) * 100;
+
+	const minDistance = 6.0; // Palce się dotykają
+	const maxDistance = 12.0; // Palce maksymalnie rozchylone
+
+	const normalized = (distance - minDistance) / (maxDistance - minDistance);
+	const clamped = Math.max(0, Math.min(1, normalized));
+}
+```
+
+## Normalizacja wartości
+
+Surowa odległość w centymetrach nie jest przydatna. Musimy ją sprowadzić do zakresu [0, 1].
+
+### Jak to działa
+
+- **minDistance = 6.0 cm** - palce się stykają, wynik = 0 (0%)
+- **maxDistance = 12.0 cm** - palce maksymalnie rozchylone, wynik = 1 (100%)
+- **wartości pośrednie** - proporcjonalnie między 0 a 1
+
+### Wzór normalizacji
+
+```typescript
+const normalized = (distance - minDistance) / (maxDistance - minDistance);
+```
+
+Jeśli odległość to 9 cm:
+
+- `(9 - 6) / (12 - 6) = 3 / 6 = 0.5`
+- Wynik: 50%
+
+### Ograniczenie zakresu (clamping)
+
+```typescript
+const clamped = Math.max(0, Math.min(1, normalized));
+```
+
+Gdy palce są bliżej niż minDistance, normalizacja da liczbę ujemną. Gdy dalej niż maxDistance, liczba większa niż 1. `Math.max()` i `Math.min()` ograniczają wynik do [0, 1].
+
+## Wizualizacja pomiaru
+
+Teraz rysujemy to na ekranie, aby użytkownik widział co mierzymy.
+
+### Rysowanie linii pomiaru
+
+Dla prawej dłoni na kamerze (nasza lewa) rysujemy zieloną linię między palcami:
+
+```typescript
+ctx.save();
+ctx.strokeStyle = "green";
+ctx.lineWidth = 3;
+ctx.beginPath();
+ctx.moveTo(thumbTip2D.x, thumbTip2D.y);
+ctx.lineTo(indexTip2D.x, indexTip2D.y);
+ctx.stroke();
+ctx.restore();
+```
+
+- **ctx.save()** - zapisujemy bieżący stan (kolory, grubość)
+- Rysujemy zieloną linię
+- **ctx.restore()** - przywracamy poprzedni stan
+
+To zapobiega wpływaniu zielonego koloru na rysowanie następnych elementów.
+
+### Tekst ze znormalizowaną wartością
+
+W środku linii wyświetlamy wartość:
+
+```typescript
+const midX = (thumbTip2D.x + indexTip2D.x) / 2;
+const midY = (thumbTip2D.y + indexTip2D.y) / 2;
+const angle = Math.atan2(indexTip2D.y - thumbTip2D.y, indexTip2D.x - thumbTip2D.x);
+
+ctx.save();
+ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
+ctx.translate(canvas.width - midX, midY - 10);
+ctx.rotate(-angle);
+ctx.fillText(`${clamped.toFixed(2)}`, 0, 0);
+ctx.restore();
+```
+
+## Transformacje geometryczne
+
+Tekst na canvasie wymaga kilku transformacji:
+
+### setTransform - odbicie lustrzane
+
+```typescript
+ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
+```
+
+Canvas jest odbity dla efektu selfie. Ta transformacja odbija tekst aby wyglądał normalnie.
+
+### translate - przesunięcie
+
+```typescript
+ctx.translate(canvas.width - midX, midY - 10);
+```
+
+Przesuwa początek układu do środka linii pomiaru.
+
+### rotate - obrót
+
+```typescript
+ctx.rotate(-angle);
+```
+
+Obliczamy kąt między palcami za pomocą `Math.atan2()` i obracamy tekst aby był równoległy do linii.
+
+## Integracja w drawHands()
+
+Cała logika pomiaru mieści się w funkcji rysowania:
+
+```typescript
+const drawHands = (hands: HandPoseDetectionType.Hand[], canvas: HTMLCanvasElement) => {
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	hands.forEach((hand) => {
+		// ... poprzedni kod rysowania dłoni
+
+		// Mierzenie dla prawej dłoni względem kamery (nasza lewa)
+		if (hand.handedness === "Right" && hand.keypoints3D) {
+			const thumbTip = hand.keypoints3D[4];
+			const indexTip = hand.keypoints3D[8];
+			const distance = getDistance(thumbTip, indexTip) * 100;
+
+			const minDistance = 6.0;
+			const maxDistance = 12.0;
+			const normalized = (distance - minDistance) / (maxDistance - minDistance);
+			const clamped = Math.max(0, Math.min(1, normalized));
+
+			// Rysujemy linię
+			const thumb2D = hand.keypoints[4];
+			const index2D = hand.keypoints[8];
+
+			ctx.save();
+			ctx.strokeStyle = "green";
+			ctx.lineWidth = 3;
+			ctx.beginPath();
+			ctx.moveTo(thumb2D.x, thumb2D.y);
+			ctx.lineTo(index2D.x, index2D.y);
+			ctx.stroke();
+			ctx.restore();
+
+			// Rysujemy wartość
+			const midX = (thumb2D.x + index2D.x) / 2;
+			const midY = (thumb2D.y + index2D.y) / 2;
+			const angle = Math.atan2(index2D.y - thumb2D.y, index2D.x - thumb2D.x);
+
+			ctx.save();
+			ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
+			ctx.translate(canvas.width - midX, midY - 10);
+			ctx.rotate(-angle);
+			ctx.fillText(`${clamped.toFixed(2)}`, 0, 0);
+			ctx.restore();
+		}
+	});
+};
+```
+
+## Potencjalne rozszerzenia
+
+Używając tej samej logiki, możemy mierzyć:
+
+- Odległość między innymi palcami
+- Kąty między stawami
+- Czy wszystkie palce są rozłożone (otwarta dłoń)
+- Czy pięść jest zaciśnięta
+- Skierowanie dłoni (orientacja w przestrzeni)
+
+## Podsumowanie
+
+✓ Funkcja `getDistance()` oblicza dystans w przestrzeni 3D  
+✓ Normalizacja sprowadza odległość do zakresu [0, 1]  
+✓ Clamping ogranicza wynik do pożądanego zakresu  
+✓ Rysujemy linię pomiaru i wartość na ekranie  
+✓ Transformacje geometryczne pozycjonują i obracają tekst
+
+System jest teraz w pełni funkcjonalny - ma detekcję gestów, wizualizację i pomiary. Można rozszerzyć go o kolejne gesty i interakcje.
