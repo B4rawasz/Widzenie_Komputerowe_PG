@@ -1,19 +1,24 @@
 ---
 title: "Perceptron"
-order: 2
-icon: Hand
+order: 6
+icon: GitFork
 description: |
-  Discover practical hand recognition techniques used in computer vision.
-  This module demonstrates applications for detecting and analyzing hands.
+  Perceptron to podstawowy model sztucznego neuronu, który jest używany w uczeniu maszynowym do klasyfikacji danych.
+  Poznajemy jego działanie, regułę uczenia oraz ograniczenia, takie jak separowalność liniowa.
 tags:
   skill_level: "intermediate"
   topic:
-    - "hand_recognition"
-    - "gesture_detection"
-    - "image_processing"
-    - "pose_estimation"
-    - "tracking"
+    - "perceptron"
+    - "neural_networks"
+    - "machine_learning"
+    - "classification"
+    - "linear_separability"
 coverImage: "/covers/cover.png"
 ---
 
+import { Perceptron, PerceptronProvider } from "@/modules/perceptron/Perceptron";
+
+<PerceptronProvider>
+	<Perceptron type={"training"}/>
+</PerceptronProvider>
 
