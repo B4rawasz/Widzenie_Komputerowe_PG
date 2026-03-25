@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { motion } from "framer-motion";
 import { Pause, Play, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type SkeletonizationProps = {
-	type: "basic";
+	type: "basic" | "graph";
 };
 
 type AlgorithmType = "thinning" | "distance";
@@ -22,6 +23,34 @@ type AnimationFrame =
 			kind: "distance";
 			intensity: Uint8Array;
 	  };
+
+type GraphNodeType = "endpoint" | "normal" | "junction" | "isolated";
+
+type GraphNode = {
+	id: number;
+	index: number;
+	x: number;
+	y: number;
+	type: GraphNodeType;
+	degree: number;
+};
+
+type GraphEdge = {
+	id: number;
+	from: number;
+	to: number;
+	path: number[];
+	length: number;
+};
+
+type SkeletonGraph = {
+	nodes: GraphNode[];
+	edges: GraphEdge[];
+	components: number;
+	loops: number;
+	endpoints: number;
+	junctions: number;
+};
 
 const CANVAS_SIZE = 400;
 
@@ -310,6 +339,508 @@ const createFrames = (
 	return frames;
 };
 
+const getSkeletonNeighbors = (mask: Uint8Array, idx: number, width: number, height: number) => {
+	const x = idx % width;
+	const y = Math.floor(idx / width);
+	const neighbors: number[] = [];
+
+	for (let oy = -1; oy <= 1; oy += 1) {
+		for (let ox = -1; ox <= 1; ox += 1) {
+			if (ox === 0 && oy === 0) {
+				continue;
+			}
+
+			const nx = x + ox;
+			const ny = y + oy;
+			if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
+				continue;
+			}
+
+			const nIdx = indexAt(nx, ny, width);
+			if (mask[nIdx] === 1) {
+				neighbors.push(nIdx);
+			}
+		}
+	}
+
+	return neighbors;
+};
+
+const collectComponents = (mask: Uint8Array, width: number, height: number) => {
+	const visited = new Uint8Array(mask.length);
+	const components: number[][] = [];
+
+	for (let idx = 0; idx < mask.length; idx += 1) {
+		if (mask[idx] === 0 || visited[idx] === 1) {
+			continue;
+		}
+
+		const queue: number[] = [idx];
+		visited[idx] = 1;
+		const component: number[] = [];
+
+		for (let head = 0; head < queue.length; head += 1) {
+			const current = queue[head];
+			component.push(current);
+
+			for (const neighbor of getSkeletonNeighbors(mask, current, width, height)) {
+				if (visited[neighbor] === 1) {
+					continue;
+				}
+				visited[neighbor] = 1;
+				queue.push(neighbor);
+			}
+		}
+
+		components.push(component);
+	}
+
+	return components;
+};
+
+const segmentKey = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+
+const extractGraphFromSkeleton = (mask: Uint8Array, width: number, height: number): SkeletonGraph => {
+	const components = collectComponents(mask, width, height);
+	if (components.length === 0) {
+		return {
+			nodes: [],
+			edges: [],
+			components: 0,
+			loops: 0,
+			endpoints: 0,
+			junctions: 0,
+		};
+	}
+
+	const neighborMap = new Map<number, number[]>();
+	const endpointSet = new Set<number>();
+	const junctionPixelSet = new Set<number>();
+
+	for (const component of components) {
+		for (const idx of component) {
+			const neighbors = getSkeletonNeighbors(mask, idx, width, height);
+			neighborMap.set(idx, neighbors);
+			if (neighbors.length <= 1) {
+				endpointSet.add(idx);
+			} else if (neighbors.length >= 3) {
+				junctionPixelSet.add(idx);
+			}
+		}
+	}
+
+	const nodes: GraphNode[] = [];
+	const pixelToNodeId = new Map<number, number>();
+	const nodeAnchors = new Map<number, number[]>();
+
+	const visitedJunction = new Set<number>();
+	for (const start of junctionPixelSet) {
+		if (visitedJunction.has(start)) {
+			continue;
+		}
+
+		const queue = [start];
+		visitedJunction.add(start);
+		const cluster: number[] = [];
+
+		for (let head = 0; head < queue.length; head += 1) {
+			const current = queue[head];
+			cluster.push(current);
+			for (const neighbor of neighborMap.get(current) ?? []) {
+				if (!junctionPixelSet.has(neighbor) || visitedJunction.has(neighbor)) {
+					continue;
+				}
+				visitedJunction.add(neighbor);
+				queue.push(neighbor);
+			}
+		}
+
+		let sumX = 0;
+		let sumY = 0;
+		for (const idx of cluster) {
+			sumX += idx % width;
+			sumY += Math.floor(idx / width);
+		}
+		const centerX = sumX / cluster.length;
+		const centerY = sumY / cluster.length;
+
+		let representative = cluster[0];
+		let bestDistance = Number.POSITIVE_INFINITY;
+		for (const idx of cluster) {
+			const dx = (idx % width) - centerX;
+			const dy = Math.floor(idx / width) - centerY;
+			const distance = dx * dx + dy * dy;
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				representative = idx;
+			}
+		}
+
+		const nodeId = nodes.length;
+		nodes.push({
+			id: nodeId,
+			index: representative,
+			x: representative % width,
+			y: Math.floor(representative / width),
+			type: "junction",
+			degree: 0,
+		});
+		nodeAnchors.set(nodeId, cluster);
+		for (const idx of cluster) {
+			pixelToNodeId.set(idx, nodeId);
+		}
+	}
+
+	for (const idx of endpointSet) {
+		if (pixelToNodeId.has(idx)) {
+			continue;
+		}
+		const nodeId = nodes.length;
+		nodes.push({
+			id: nodeId,
+			index: idx,
+			x: idx % width,
+			y: Math.floor(idx / width),
+			type: "endpoint",
+			degree: 0,
+		});
+		nodeAnchors.set(nodeId, [idx]);
+		pixelToNodeId.set(idx, nodeId);
+	}
+
+	for (const component of components) {
+		const hasNode = component.some((idx) => pixelToNodeId.has(idx));
+		if (hasNode || component.length === 0) {
+			continue;
+		}
+		const idx = component[0];
+		const nodeId = nodes.length;
+		nodes.push({
+			id: nodeId,
+			index: idx,
+			x: idx % width,
+			y: Math.floor(idx / width),
+			type: "isolated",
+			degree: 0,
+		});
+		nodeAnchors.set(nodeId, [idx]);
+		pixelToNodeId.set(idx, nodeId);
+	}
+
+	const edges: GraphEdge[] = [];
+	const visitedSegments = new Set<string>();
+
+	for (const node of nodes) {
+		const startAnchors = nodeAnchors.get(node.id) ?? [node.index];
+		for (const startIndex of startAnchors) {
+			const startNeighbors = neighborMap.get(startIndex) ?? [];
+			for (const neighborIndex of startNeighbors) {
+				if (pixelToNodeId.get(neighborIndex) === node.id) {
+					continue;
+				}
+
+				const firstKey = segmentKey(startIndex, neighborIndex);
+				if (visitedSegments.has(firstKey)) {
+					continue;
+				}
+
+				const path = [startIndex, neighborIndex];
+				visitedSegments.add(firstKey);
+
+				let prev = startIndex;
+				let current = neighborIndex;
+				let guard = 0;
+
+				while (guard < width * height) {
+					guard += 1;
+					const nodeAtCurrent = pixelToNodeId.get(current);
+					if (nodeAtCurrent !== undefined && nodeAtCurrent !== node.id) {
+						break;
+					}
+
+					const options = (neighborMap.get(current) ?? []).filter(
+						(idx) => idx !== prev && pixelToNodeId.get(idx) !== node.id,
+					);
+					if (options.length === 0) {
+						break;
+					}
+
+					const next = options.find((candidate) => !visitedSegments.has(segmentKey(current, candidate))) ?? options[0];
+					visitedSegments.add(segmentKey(current, next));
+					prev = current;
+					current = next;
+					path.push(current);
+				}
+
+				let endNodeId = pixelToNodeId.get(current);
+				if (endNodeId === undefined) {
+					const fallbackId = nodes.length;
+					nodes.push({
+						id: fallbackId,
+						index: current,
+						x: current % width,
+						y: Math.floor(current / width),
+						type: "endpoint",
+						degree: 0,
+					});
+					nodeAnchors.set(fallbackId, [current]);
+					pixelToNodeId.set(current, fallbackId);
+					endNodeId = fallbackId;
+				}
+
+				if (endNodeId === node.id) {
+					continue;
+				}
+
+				edges.push({
+					id: edges.length,
+					from: node.id,
+					to: endNodeId,
+					path,
+					length: Math.max(0, path.length - 1),
+				});
+			}
+		}
+	}
+
+	const degreeMap = new Map<number, number>();
+	for (const edge of edges) {
+		degreeMap.set(edge.from, (degreeMap.get(edge.from) ?? 0) + 1);
+		degreeMap.set(edge.to, (degreeMap.get(edge.to) ?? 0) + 1);
+	}
+
+	for (const node of nodes) {
+		const degree = degreeMap.get(node.id) ?? 0;
+		node.degree = degree;
+		if (degree <= 0) {
+			node.type = "isolated";
+		} else if (degree === 1) {
+			node.type = "endpoint";
+		} else if (degree === 2) {
+			node.type = "normal";
+		} else {
+			node.type = "junction";
+		}
+	}
+
+	const endpoints = nodes.filter((node) => node.type === "endpoint").length;
+	const junctions = nodes.filter((node) => node.type === "junction").length;
+	const loops = Math.max(0, edges.length - nodes.length + components.length);
+
+	return {
+		nodes,
+		edges,
+		components: components.length,
+		loops,
+		endpoints,
+		junctions,
+	};
+};
+
+const pruneSkeletonBranches = (inputMask: Uint8Array, width: number, height: number, threshold: number) => {
+	if (threshold <= 0) {
+		return new Uint8Array(inputMask);
+	}
+
+	const mask = new Uint8Array(inputMask);
+	const graph = extractGraphFromSkeleton(mask, width, height);
+	if (graph.edges.length === 0) {
+		return mask;
+	}
+
+	const nodeById = new Map<number, GraphNode>();
+	for (const node of graph.nodes) {
+		nodeById.set(node.id, node);
+	}
+
+	const removableEdges = graph.edges.filter((edge) => {
+		if (edge.length >= threshold) {
+			return false;
+		}
+		const fromType = nodeById.get(edge.from)?.type;
+		const toType = nodeById.get(edge.to)?.type;
+		return fromType === "endpoint" || toType === "endpoint";
+	});
+
+	for (const edge of removableEdges) {
+		const fromNode = nodeById.get(edge.from);
+		const toNode = nodeById.get(edge.to);
+		if (!fromNode || !toNode) {
+			continue;
+		}
+
+		for (let i = 0; i < edge.path.length; i += 1) {
+			const pixelIndex = edge.path[i];
+			const keepFromJunction = i === 0 && fromNode.type !== "endpoint";
+			const keepToJunction = i === edge.path.length - 1 && toNode.type !== "endpoint";
+			if (keepFromJunction || keepToJunction) {
+				continue;
+			}
+
+			if (mask[pixelIndex] === 1) {
+				mask[pixelIndex] = 0;
+			}
+		}
+	}
+
+	return mask;
+};
+
+const mergeGraphNodes = (graph: SkeletonGraph, mergeRadius: number): SkeletonGraph => {
+	if (mergeRadius <= 0 || graph.nodes.length <= 1) {
+		return graph;
+	}
+
+	const parent = graph.nodes.map((_, index) => index);
+	const find = (node: number): number => {
+		let root = node;
+		while (parent[root] !== root) {
+			root = parent[root];
+		}
+		let current = node;
+		while (parent[current] !== current) {
+			const next = parent[current];
+			parent[current] = root;
+			current = next;
+		}
+		return root;
+	};
+	const union = (a: number, b: number) => {
+		const ra = find(a);
+		const rb = find(b);
+		if (ra !== rb) {
+			parent[rb] = ra;
+		}
+	};
+
+	const radiusSq = mergeRadius * mergeRadius;
+	for (let i = 0; i < graph.nodes.length; i += 1) {
+		for (let j = i + 1; j < graph.nodes.length; j += 1) {
+			const dx = graph.nodes[i].x - graph.nodes[j].x;
+			const dy = graph.nodes[i].y - graph.nodes[j].y;
+			if (dx * dx + dy * dy <= radiusSq) {
+				union(i, j);
+			}
+		}
+	}
+
+	const groups = new Map<number, number[]>();
+	for (let i = 0; i < graph.nodes.length; i += 1) {
+		const root = find(i);
+		const arr = groups.get(root) ?? [];
+		arr.push(i);
+		groups.set(root, arr);
+	}
+
+	const oldToNew = new Map<number, number>();
+	const mergedNodes: GraphNode[] = [];
+
+	for (const members of groups.values()) {
+		let sumX = 0;
+		let sumY = 0;
+		let sumIndex = 0;
+		for (const member of members) {
+			const node = graph.nodes[member];
+			sumX += node.x;
+			sumY += node.y;
+			sumIndex += node.index;
+		}
+
+		const nodeId = mergedNodes.length;
+		for (const member of members) {
+			oldToNew.set(graph.nodes[member].id, nodeId);
+		}
+
+		mergedNodes.push({
+			id: nodeId,
+			index: Math.round(sumIndex / members.length),
+			x: sumX / members.length,
+			y: sumY / members.length,
+			type: "isolated",
+			degree: 0,
+		});
+	}
+
+	const edgeMap = new Map<string, GraphEdge>();
+	for (const edge of graph.edges) {
+		const from = oldToNew.get(edge.from);
+		const to = oldToNew.get(edge.to);
+		if (from === undefined || to === undefined || from === to) {
+			continue;
+		}
+
+		const a = Math.min(from, to);
+		const b = Math.max(from, to);
+		const key = `${a}-${b}`;
+		const existing = edgeMap.get(key);
+		if (!existing || edge.length < existing.length) {
+			edgeMap.set(key, {
+				id: -1,
+				from: a,
+				to: b,
+				path: edge.path,
+				length: edge.length,
+			});
+		}
+	}
+
+	const mergedEdges = Array.from(edgeMap.values()).map((edge, index) => ({ ...edge, id: index }));
+
+	const degreeMap = new Map<number, number>();
+	for (const edge of mergedEdges) {
+		degreeMap.set(edge.from, (degreeMap.get(edge.from) ?? 0) + 1);
+		degreeMap.set(edge.to, (degreeMap.get(edge.to) ?? 0) + 1);
+	}
+
+	for (const node of mergedNodes) {
+		const degree = degreeMap.get(node.id) ?? 0;
+		node.degree = degree;
+		node.type = degree <= 0 ? "isolated" : degree === 1 ? "endpoint" : degree === 2 ? "normal" : "junction";
+	}
+
+	let components = 0;
+	const visited = new Set<number>();
+	const adjacency = new Map<number, number[]>();
+	for (const node of mergedNodes) {
+		adjacency.set(node.id, []);
+	}
+	for (const edge of mergedEdges) {
+		adjacency.get(edge.from)?.push(edge.to);
+		adjacency.get(edge.to)?.push(edge.from);
+	}
+	for (const node of mergedNodes) {
+		if (visited.has(node.id)) {
+			continue;
+		}
+		components += 1;
+		const queue = [node.id];
+		visited.add(node.id);
+		for (let head = 0; head < queue.length; head += 1) {
+			const current = queue[head];
+			for (const neighbor of adjacency.get(current) ?? []) {
+				if (visited.has(neighbor)) {
+					continue;
+				}
+				visited.add(neighbor);
+				queue.push(neighbor);
+			}
+		}
+	}
+
+	const endpoints = mergedNodes.filter((node) => node.type === "endpoint").length;
+	const junctions = mergedNodes.filter((node) => node.type === "junction").length;
+	const loops = Math.max(0, mergedEdges.length - mergedNodes.length + components);
+
+	return {
+		nodes: mergedNodes,
+		edges: mergedEdges,
+		components,
+		loops,
+		endpoints,
+		junctions,
+	};
+};
+
 export function Skeletonization({ type }: SkeletonizationProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const isDrawingRef = useRef(false);
@@ -317,6 +848,7 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const framesRef = useRef<AnimationFrame[]>([]);
 	const sourceMaskRef = useRef<Uint8Array | null>(null);
+	const thinningMaskRef = useRef<Uint8Array | null>(null);
 
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [algorithm, setAlgorithm] = useState<AlgorithmType>("thinning");
@@ -325,18 +857,28 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 	const [currentFrame, setCurrentFrame] = useState(0);
 	const [frameCount, setFrameCount] = useState(0);
 	const [drawColor, setDrawColor] = useState("#ffffff");
+	const [primaryColor, setPrimaryColor] = useState("#3b82f6");
+	const [destructiveColor, setDestructiveColor] = useState("#ef4444");
+	const [pruningLength, setPruningLength] = useState(8);
+	const [nodeMergeRadius, setNodeMergeRadius] = useState(8);
+	const [graphData, setGraphData] = useState<SkeletonGraph | null>(null);
 
 	const delay = useMemo(() => Math.round(40 + (1 - speed) * 500), [speed]);
+	const isGraphMode = type === "graph";
 
 	useEffect(() => {
-		if (type !== "basic") {
-			return;
-		}
-
 		const updateColor = () => {
 			const foreground = getComputedStyle(document.documentElement).getPropertyValue("--color-foreground").trim();
+			const primary = getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim();
+			const destructive = getComputedStyle(document.documentElement).getPropertyValue("--color-destructive").trim();
 			if (foreground.length > 0) {
 				setDrawColor(foreground);
+			}
+			if (primary.length > 0) {
+				setPrimaryColor(primary);
+			}
+			if (destructive.length > 0) {
+				setDestructiveColor(destructive);
 			}
 		};
 
@@ -358,7 +900,7 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 		return () => {
 			observer.disconnect();
 		};
-	}, [type]);
+	}, []);
 
 	const getContext = () => {
 		const canvas = canvasRef.current;
@@ -420,6 +962,13 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 		renderDistance(frame.intensity);
 	};
 
+	const applyPruningAndBuildGraph = (baseSkeleton: Uint8Array) => {
+		const pruned = pruneSkeletonBranches(baseSkeleton, CANVAS_SIZE, CANVAS_SIZE, pruningLength);
+		renderMask(pruned);
+		const rawGraph = extractGraphFromSkeleton(pruned, CANVAS_SIZE, CANVAS_SIZE);
+		setGraphData(mergeGraphNodes(rawGraph, nodeMergeRadius));
+	};
+
 	const extractMask = () => {
 		const ctx = getContext();
 		if (!ctx) {
@@ -442,6 +991,8 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 
 	const resetToSource = () => {
 		stopAnimation();
+		setGraphData(null);
+		thinningMaskRef.current = null;
 		if (!sourceMaskRef.current) {
 			return;
 		}
@@ -458,6 +1009,8 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 		ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 		framesRef.current = [];
 		sourceMaskRef.current = null;
+		thinningMaskRef.current = null;
+		setGraphData(null);
 		setCurrentFrame(0);
 		setFrameCount(0);
 	};
@@ -529,13 +1082,18 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 		const hasForeground = initialMask.some((value) => value === 1);
 		if (!hasForeground) {
 			stopAnimation();
+			setGraphData(null);
+			thinningMaskRef.current = null;
 			setCurrentFrame(0);
 			setFrameCount(0);
 			return;
 		}
 
 		sourceMaskRef.current = new Uint8Array(initialMask);
-		const frames = createFrames(initialMask, CANVAS_SIZE, CANVAS_SIZE, algorithm);
+		setGraphData(null);
+		thinningMaskRef.current = null;
+		const selectedAlgorithm: AlgorithmType = isGraphMode ? "thinning" : algorithm;
+		const frames = createFrames(initialMask, CANVAS_SIZE, CANVAS_SIZE, selectedAlgorithm);
 		framesRef.current = frames;
 		setFrameCount(frames.length);
 		setCurrentFrame(0);
@@ -543,6 +1101,10 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 
 		if (frames.length <= 1) {
 			setIsAnimating(false);
+			if (isGraphMode && frames[0]?.kind === "binary") {
+				thinningMaskRef.current = new Uint8Array(frames[0].mask);
+				applyPruningAndBuildGraph(frames[0].mask);
+			}
 			return;
 		}
 
@@ -555,6 +1117,11 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 				clearAnimationInterval();
 				setIsAnimating(false);
 				setCurrentFrame(frames.length - 1);
+				const finalFrame = frames[frames.length - 1];
+				if (isGraphMode && finalFrame?.kind === "binary") {
+					thinningMaskRef.current = new Uint8Array(finalFrame.mask);
+					applyPruningAndBuildGraph(finalFrame.mask);
+				}
 				return;
 			}
 
@@ -564,33 +1131,50 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 	};
 
 	useEffect(() => {
+		if (!isGraphMode || isAnimating || !thinningMaskRef.current) {
+			return;
+		}
+
+		applyPruningAndBuildGraph(thinningMaskRef.current);
+	}, [pruningLength, nodeMergeRadius, isGraphMode, isAnimating]);
+
+	useEffect(() => {
 		return () => {
 			clearAnimationInterval();
 		};
 	}, []);
 
-	if (type !== "basic") {
+	if (type !== "basic" && type !== "graph") {
 		return null;
 	}
 
+	const graphNodeMap = useMemo(() => {
+		if (!graphData) {
+			return new Map<number, GraphNode>();
+		}
+		return new Map(graphData.nodes.map((node) => [node.id, node]));
+	}, [graphData]);
+
 	return (
-		<div className="grid grid-cols-2 gap-4 my-6">
+		<div className="grid grid-cols-2 gap-4 my-6 items-center">
 			<div className="w-full aspect-4/3 flex flex-col justify-center gap-4">
 				<div className="flex flex-row justify-center gap-2">
-					<ToggleGroup
-						type="single"
-						variant="outline"
-						spacing={2}
-						value={algorithm}
-						onValueChange={(value) => {
-							if (value === "thinning" || value === "distance") {
-								setAlgorithm(value);
-							}
-						}}
-					>
-						<ToggleGroupItem value="thinning">Thinning</ToggleGroupItem>
-						<ToggleGroupItem value="distance">Distance Transform</ToggleGroupItem>
-					</ToggleGroup>
+					{!isGraphMode && (
+						<ToggleGroup
+							type="single"
+							variant="outline"
+							spacing={2}
+							value={algorithm}
+							onValueChange={(value) => {
+								if (value === "thinning" || value === "distance") {
+									setAlgorithm(value);
+								}
+							}}
+						>
+							<ToggleGroupItem value="thinning">Thinning</ToggleGroupItem>
+							<ToggleGroupItem value="distance">Distance Transform</ToggleGroupItem>
+						</ToggleGroup>
+					)}
 					<Button variant="outline" size="icon" onClick={clearCanvas}>
 						<Trash2 />
 					</Button>
@@ -606,16 +1190,56 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 				</div>
 
 				<div className="flex-1 relative flex items-center justify-center min-h-0">
-					<canvas
-						ref={canvasRef}
-						width={CANVAS_SIZE}
-						height={CANVAS_SIZE}
-						className="w-auto h-full aspect-square bg-card rounded-md border border-border cursor-crosshair"
-						onPointerDown={onPointerDown}
-						onPointerMove={onPointerMove}
-						onPointerUp={onPointerUp}
-						onPointerLeave={onPointerUp}
-					/>
+					<div className="relative w-auto h-full aspect-square">
+						<canvas
+							ref={canvasRef}
+							width={CANVAS_SIZE}
+							height={CANVAS_SIZE}
+							className="w-full h-full bg-card rounded-md border border-border cursor-crosshair"
+							onPointerDown={onPointerDown}
+							onPointerMove={onPointerMove}
+							onPointerUp={onPointerUp}
+							onPointerLeave={onPointerUp}
+						/>
+						{isGraphMode && graphData && !isAnimating && (
+							<motion.svg
+								key={`graph-${graphData.nodes.length}-${graphData.edges.length}`}
+								viewBox="0 0 400 400"
+								className="pointer-events-none absolute inset-0 w-full h-full"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ duration: 0.25 }}
+							>
+								{graphData.edges.map((edge) => (
+									<motion.line
+										key={edge.id}
+										x1={graphNodeMap.get(edge.from)?.x ?? 0}
+										y1={graphNodeMap.get(edge.from)?.y ?? 0}
+										x2={graphNodeMap.get(edge.to)?.x ?? 0}
+										y2={graphNodeMap.get(edge.to)?.y ?? 0}
+										stroke={primaryColor}
+										strokeWidth={2}
+										opacity={0.8}
+										initial={{ pathLength: 0, opacity: 0 }}
+										animate={{ pathLength: 1, opacity: 0.8 }}
+										transition={{ duration: 0.35, delay: Math.min(edge.id * 0.015, 0.25) }}
+									/>
+								))}
+								{graphData.nodes.map((node) => (
+									<motion.circle
+										key={node.id}
+										cx={node.x}
+										cy={node.y}
+										r={4}
+										fill={node.type === "junction" ? destructiveColor : primaryColor}
+										initial={{ scale: 0, opacity: 0 }}
+										animate={{ scale: 1, opacity: 1 }}
+										transition={{ type: "spring", stiffness: 280, damping: 20, delay: Math.min(node.id * 0.015, 0.25) }}
+									/>
+								))}
+							</motion.svg>
+						)}
+					</div>
 				</div>
 			</div>
 
@@ -650,6 +1274,35 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 					/>
 				</div>
 
+				{isGraphMode && (
+					<div className="mx-auto grid w-full max-w-xs gap-2">
+						<div className="flex items-center justify-between gap-2">
+							<Label htmlFor="pruning-slider">Pruning length</Label>
+							<span className="text-muted-foreground text-sm">{pruningLength.toFixed(0)}</span>
+						</div>
+						<Slider
+							id="pruning-slider"
+							value={[pruningLength]}
+							onValueChange={(value) => setPruningLength(value[0])}
+							min={0}
+							max={60}
+							step={1}
+						/>
+						<div className="flex items-center justify-between gap-2 mt-2">
+							<Label htmlFor="merge-slider">Node merge radius</Label>
+							<span className="text-muted-foreground text-sm">{nodeMergeRadius.toFixed(0)}</span>
+						</div>
+						<Slider
+							id="merge-slider"
+							value={[nodeMergeRadius]}
+							onValueChange={(value) => setNodeMergeRadius(value[0])}
+							min={0}
+							max={30}
+							step={1}
+						/>
+					</div>
+				)}
+
 				<div className="mx-auto grid w-full max-w-xs gap-1 text-sm">
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Status</span>
@@ -657,7 +1310,7 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 					</div>
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Algorithm</span>
-						<span className="capitalize">{algorithm}</span>
+						<span className="capitalize">{isGraphMode ? "thinning + pruning + graph" : algorithm}</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-muted-foreground">Frame</span>
@@ -665,10 +1318,30 @@ export function Skeletonization({ type }: SkeletonizationProps) {
 							{frameCount === 0 ? 0 : currentFrame + 1}/{frameCount}
 						</span>
 					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Delay</span>
-						<span>{delay} ms</span>
-					</div>
+					{isGraphMode && (
+						<>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Nodes</span>
+								<span>{graphData?.nodes.length ?? 0}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Intersections</span>
+								<span>{graphData?.junctions ?? 0}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Edges</span>
+								<span>{graphData?.edges.length ?? 0}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Components</span>
+								<span>{graphData?.components ?? 0}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Loops</span>
+								<span>{graphData?.loops ?? 0}</span>
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 		</div>
