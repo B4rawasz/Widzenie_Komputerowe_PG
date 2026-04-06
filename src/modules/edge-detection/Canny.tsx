@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Upload } from "lucide-react";
@@ -449,24 +450,11 @@ export function Canny() {
 			</div>
 
 			<div className="w-full aspect-4/3 flex flex-col justify-center gap-4">
-				<div className="rounded-md border border-border bg-card p-2">
-					<div className="text-sm font-medium mb-2 text-center">Canny Edge Map</div>
-					<div className="aspect-square rounded-sm border border-border overflow-hidden bg-background">
-						{edgesPreviewUrl ? (
-							<img src={edgesPreviewUrl} alt="Canny edge map" className="w-full h-full object-cover" />
-						) : (
-							<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground px-3 text-center">
-								No Canny result yet.
-							</div>
-						)}
-					</div>
-				</div>
-
-				<div className="rounded-md border border-border bg-card p-4 space-y-5">
-					<div className="space-y-2">
-						<div className="flex items-center justify-between text-sm">
-							<span>Próg</span>
-							<span className="font-medium">
+				<div className="flex flex-row justify-center gap-2">
+					<div className="mx-auto grid w-full max-w-xs gap-2">
+						<div className="flex items-center justify-between gap-2">
+							<Label htmlFor="speed-slider">Próg</Label>
+							<span className="text-muted-foreground text-sm">
 								{lowerThreshold}-{upperThreshold}
 							</span>
 						</div>
@@ -486,6 +474,21 @@ export function Canny() {
 								}
 							}}
 						/>
+					</div>
+				</div>
+				<div className="flex-1 relative flex items-center justify-center min-h-0">
+					<div className="relative w-auto h-full aspect-square">
+						{edgesPreviewUrl ? (
+							<img
+								src={edgesPreviewUrl}
+								alt="Canny edge map"
+								className="w-full h-full object-cover bg-card rounded-md border border-border"
+							/>
+						) : (
+							<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground px-3 text-center">
+								No Canny result yet.
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
