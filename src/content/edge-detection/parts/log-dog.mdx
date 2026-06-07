@@ -1,0 +1,44 @@
+---
+title: "LoG / DoG"
+order: 3
+icon: AlignHorizontalJustifyCenter
+---
+
+import {
+    LoGDoGProvider,
+    LoGSource,
+    LoGParams,
+    DoGParams,
+    LoGBlurPreview,
+    LoGLaplacianPreview,
+    DoGBlurAPreview,
+    DoGBlurBPreview,
+    DoGDiffPreview,
+    LoGOutputs,
+} from "@/modules/edge-detection/LoGDoG";
+
+LoG (Laplacian of Gaussian) stosuje najpierw rozmycie Gaussa, a następnie operator Laplace'a, co wydobywa miejsca, gdzie druga pochodna obrazu przechodzi przez zero — często odpowiada to krawędziom.
+
+DoG (Difference of Gaussians) przybliża LoG przez odjęcie dwóch rozmyć Gaussa o różnych sigma — jest prostszy obliczeniowo i często używany jako detektor krawędzi/cech.
+
+<LoGDoGProvider>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+        <LoGSource />
+        <div className="grid gap-4">
+            <LoGParams />
+            <DoGParams />
+        </div>
+    </div>
+
+    <div className="my-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <LoGBlurPreview />
+        <LoGLaplacianPreview />
+        <DoGBlurAPreview />
+        <DoGBlurBPreview />
+        <DoGDiffPreview />
+    </div>
+
+    <div className="my-4">
+        <LoGOutputs />
+    </div>
+</LoGDoGProvider>
