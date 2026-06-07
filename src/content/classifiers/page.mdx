@@ -1,0 +1,63 @@
+---
+title: "Klasyfikatory"
+order: 4
+icon: LayoutGrid
+description: |
+  Klasyfikator to model przypisujący obserwacje do klas. Poznasz cztery rodzaje klasyfikatorów:
+  statystyczny (Bayesa), minimalnoodległościowy, liniowy oraz odcinkowo-liniowy — i zobaczysz,
+  jak kształt granicy decyzyjnej wpływa na jakość klasyfikacji.
+tags:
+  skill_level: "intermediate"
+  topic:
+    - "classification"
+    - "decision boundary"
+    - "bayes classifier"
+    - "nearest centroid"
+    - "linear classifier"
+    - "piecewise linear"
+coverImage: "/covers/cover.png"
+---
+
+import { Classifier } from "@/modules/classifiers/Classifiers";
+
+## Klasyfikator statystyczny
+
+Klasyfikator statystyczny (naiwny Bayes) opisuje każdą klasę rozkładem normalnym. Dla nowego punktu wybiera klasę o najwyższej gęstości prawdopodobieństwa `p(x | klasa)`. Na wykresie widoczne są **elipsy izoprawdopodobieństwa** (2σ) dla każdej klasy.
+
+Przeciągnij próbkę testową (białe kółko) po przestrzeni — zobaczysz, jak zmienia przypisaną klasę w miarę zbliżania się do kolejnych elips.
+
+<Classifier type={"statistical"} />
+
+---
+
+## Klasyfikator minimalnoodległościowy
+
+Klasyfikator minimalnoodległościowy (najbliższy centroid) przypisuje punkt do klasy, której **centroid** (środek ciężkości) jest najbliżej. Granice decyzyjne to **diagramy Woronoja** — prostopadłe dwusieczne odcinków łączących centroidy.
+
+Przeciągnij białe kółko — przerywana linia pokazuje odległość do najbliższego centroidu (◆).
+
+<Classifier type={"nearest-centroid"} />
+
+---
+
+## Klasyfikator liniowy
+
+Klasyfikator liniowy dzieli przestrzeń cech **jedną prostą** (hiperpłaszczyzną). Wyraża się wzorem:
+
+```
+w₁x + w₂y + b = 0
+```
+
+gdzie `w₁`, `w₂` to wagi, a `b` to bias. Podejście to jest podstawą perceptronu i regresji logistycznej. Ustaw granicę decyzyjną suwakami i obserwuj liczbę błędnie sklasyfikowanych punktów.
+
+<Classifier type={"linear"} />
+
+---
+
+## Klasyfikator odcinkowo-liniowy
+
+Gdy zbiór danych nie jest liniowo separowalny, granicę decyzyjną można złożyć z **wielu segmentów prostych**. Każdy segment to osobna lokalna granica. Razem tworzą poligon dzielący przestrzeń na obszary klas.
+
+Przeciągaj białe uchwyty na wierzchołkach granicy, dodawaj lub usuwaj segmenty i staraj się zminimalizować liczbę błędów.
+
+<Classifier type={"piecewise"} />
