@@ -1,0 +1,47 @@
+---
+title: "Wykrywanie prymitywów"
+order: 3
+icon: ScanSearch
+description: |
+  Transformacja Hougha to klasyczna technika wykrywania geometrycznych prymitywów — prostych i okręgów — w obrazach binarnych (krawędziowych).
+  Poznasz zasadę działania akumulatora, pojęcie przestrzeni parametrycznej i sposób znajdowania peaków.
+tags:
+  skill_level: "intermediate"
+  topic:
+    - "hough transform"
+    - "line detection"
+    - "circle detection"
+    - "edge detection"
+    - "accumulator"
+coverImage: "/covers/cover.png"
+---
+
+import { HoughTransform } from "@/modules/hough/HoughTransform";
+
+## Transformacja Hougha — proste
+
+Transformacja Hougha przekształca każdy piksel krawędziowy z przestrzeni obrazu `(x, y)` do przestrzeni parametrycznej `(ρ, θ)`, zgodnie ze wzorem:
+
+```
+ρ = x·cos(θ) + y·sin(θ)
+```
+
+Każdy punkt głosuje na wszystkie możliwe proste, które przez niego przechodzą. Kolumny akumulatora odpowiadają kątowi θ, wiersze — odległości ρ od środka układu. Jasne plamy (peaki) w akumulatorze oznaczają proste, na które głosowało najwięcej pikseli.
+
+**Załaduj własny obraz lub użyj przykładowego. Wczytaj krawędzie i obserwuj akumulator — najedź na peak, aby zobaczyć wykrytą prostą.**
+
+<HoughTransform type={"lines"} />
+
+---
+
+## Transformacja Hougha — okręgi
+
+Dla okręgów o **ustalonym promieniu `r`** każdy piksel krawędziowy głosuje na wszystkie możliwe środki `(cx, cy)`:
+
+```
+cx = x - r·cos(α),   cy = y - r·sin(α)
+```
+
+Akumulator ma teraz wymiary przestrzeni obrazu — każdy jasny punkt to kandydat na środek okręgu. Zmień suwak promienia i obserwuj, jak peaki pojawiają się dokładnie w centrum kół.
+
+<HoughTransform type={"circles"} />
