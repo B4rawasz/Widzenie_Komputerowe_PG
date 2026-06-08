@@ -1,0 +1,52 @@
+---
+title: "Proste sieci neuronowe"
+order: 5
+icon: Network
+description: |
+  Od perceptronu do wielowarstwowej sieci MLP. Poznasz topologię sieci, propagację w przód,
+  wizualizację wag i aktywacji, a także mechanizm softmax i wpływ temperatury na pewność decyzji.
+tags:
+  skill_level: "intermediate"
+  topic:
+    - "neural networks"
+    - "MLP"
+    - "backpropagation"
+    - "softmax"
+    - "activation functions"
+    - "digit recognition"
+coverImage: "/covers/cover.png"
+---
+
+import { NeuralNetwork } from "@/modules/neural-networks/NeuralNetworks";
+
+## Od perceptronu do MLP
+
+Perceptron to sieć z jedną warstwą i jednym neuronem. MLP (Multilayer Perceptron) rozszerza tę ideę o dowolną liczbę warstw ukrytych i neuronów. Każda warstwa wykonuje przekształcenie liniowe, po którym stosowana jest nieliniowa funkcja aktywacji (tutaj ReLU).
+
+Dodawaj i usuwaj warstwy oraz neurony — obserwuj jak zmienia się propagacja sygnału. Kliknij neuron, aby zobaczyć jego aktywację i wagi wejściowe.
+
+<NeuralNetwork type={"mlp-topology"} />
+
+---
+
+## MLP do rozpoznawania cyfr
+
+Sieć 64 → 64 → 32 → 10 wytrenowana na zbiorze sklearn digits (8×8 px, cyfry 0–9). Narysuj cyfrę lewym przyciskiem myszy — prawym wymazujesz. Sieć na bieżąco aktualizuje predykcję i wyświetla aktywacje obu warstw ukrytych.
+
+<NeuralNetwork type={"digit-recognizer"} />
+
+---
+
+## Wizualizacja wag i aktywacji
+
+Ta sama sieć co wyżej, ale z możliwością kliknięcia dowolnego neuronu. Dla neuronu w **warstwie ukrytej 1** zobaczysz mapę wag w przestrzeni 8×8 — czyli które piksele najbardziej go aktywują. Dla neuronu w **warstwach głębszych** zobaczysz wagi od neuronów poprzedniej warstwy.
+
+<NeuralNetwork type={"weight-viz"} />
+
+---
+
+## Softmax i pewność decyzji
+
+Ostatnia warstwa sieci produkuje **logity** — surowe wartości przed normalizacją. Funkcja softmax przekształca je w rozkład prawdopodobieństwa sumujący się do 1. **Temperatura** skaluje logity przed softmax: niska temperatura wyostrza rozkład (jeden wynik dominuje), wysoka go spłaszcza (sieć staje się „niepewna"). Widoczna jest też **entropia Shannona** rozkładu.
+
+<NeuralNetwork type={"softmax-viz"} />
