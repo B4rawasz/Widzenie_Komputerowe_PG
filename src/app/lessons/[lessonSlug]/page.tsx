@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProgressTracker } from "@/components/lessons/ProgressTracker";
+import { ScrollProgress } from "@/components/lessons/ScrollProgress";
 
 type MDXFrontmatter = {
 	title?: string;
@@ -38,6 +39,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
 	return (
 		<article id="lessonContent" className="prose lg:prose-xl max-w-4xl py-8">
 			<ProgressTracker lessonSlug={lessonSlug} />
+			<ScrollProgress />
 			<h1>{metadata?.title || lessonSlug}</h1>
 
 			<ContentComponent />

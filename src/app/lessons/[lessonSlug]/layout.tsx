@@ -16,7 +16,7 @@ export default async function LessonLayout({
 	const lesson = getLessonMetadata(lessonSlug);
 
 	return (
-		<div className="max-w-360 mx-auto flex flex-row">
+		<div className="max-w-360 mx-auto flex flex-row pb-8">
 			<aside className="w-1/5 sticky top-16 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-4rem)] px-2 flex flex-col">
 				<NavClient lessonSlug={lessonSlug} lesson={lesson} parts={parts} />
 			</aside>
