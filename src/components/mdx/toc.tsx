@@ -57,8 +57,8 @@ export function TableOfContents() {
 		const rect = el!.getBoundingClientRect();
 		setBlobStyle({
 			top: rect.top - listRect.top - 2,
-			left: rect.left - listRect.left - 8,
-			width: rect.width + 16,
+			left: rect.left - listRect.left - 4,
+			width: rect.width + 8,
 			height: rect.height + 4,
 		});
 	}, [activeId, headings]);
@@ -74,7 +74,7 @@ export function TableOfContents() {
 
 	return (
 		<ScrollArea className="flex-1 min-h-0 pl-2 relative">
-			<div className="relative ml-4">
+			<div className="relative ml-4 p-2">
 				<ul className="text-sm my-0 relative" ref={listRef}>
 					{blobStyle && (
 						<motion.div
@@ -90,7 +90,7 @@ export function TableOfContents() {
 								left: blobStyle.left,
 								width: blobStyle.width,
 								height: blobStyle.height,
-								borderRadius: "9999px",
+								borderRadius: "6px",
 								zIndex: 0,
 							}}
 							className="absolute bg-primary rounded-full pointer-events-none"
