@@ -97,12 +97,12 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 						<h3>{lesson.title}</h3>
 						<div className="text-sm grow">{lesson.description}</div>
 						<div className="flex justify-between w-full text-sm text-muted-foreground">
-							<span>Progress</span>
+							<span>Progres</span>
 							<span>67%</span>
 						</div>
 						<Progress value={67} />
 						<Button asChild className="w-full mt-4 mb-6">
-							<Link href={`/lessons/${lesson.slug}`}>Start Lesson</Link>
+							<Link href={`/lessons/${lesson.slug}`}>Rozpocznij lekcję</Link>
 						</Button>
 					</div>
 				</motion.div>
@@ -138,19 +138,19 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 	return (
 		<div className="max-w-360 mx-auto flex flex-row">
 			<aside className="w-1/5 sticky top-16 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-4rem)] px-2 flex flex-col">
-				<h2 className="mt-8 mb-3">Filter by Tags</h2>
+				<h2 className="mt-8 mb-3">Filtruj</h2>
 				<ScrollArea className="flex-1 min-h-0 pr-2">
 					<div className="flex flex-col flex-wrap gap-2 pr-2">
-						<h4 className="py-2 -mb-2 sticky top-0 bg-background">Skill Levels</h4>
+						<h4 className="py-2 -mb-2 sticky top-0 bg-background">Poziom zaawansowania</h4>
 						{drawTags(lessonsTags.skill_levels)}
-						<h4 className="py-2 -mb-2 sticky top-0 bg-background">Topics</h4>
-						{drawTags(lessonsTags.topics)}
+						{/*<h4 className="py-2 -mb-2 sticky top-0 bg-background">Topics</h4>
+						{drawTags(lessonsTags.topics)}*/}
 					</div>
 				</ScrollArea>
 			</aside>
 			<div className="flex-1 flex flex-col mb-4">
-				<h2 className="mt-8">All Lessons</h2>
-				<span className="text-muted-foreground mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+				<h2 className="mt-8">Lekcje</h2>
+				<span className="text-muted-foreground mb-8">Tu poznasz wszystkie tajniki computer vision</span>
 				<div className="grid grid-cols-3 gap-4">{lessonsList}</div>
 			</div>
 		</div>

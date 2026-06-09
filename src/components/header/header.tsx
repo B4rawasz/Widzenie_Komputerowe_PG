@@ -27,7 +27,7 @@ export default function Header() {
 					<NavigationMenu viewport={isMobile}>
 						<NavigationMenuList className="flex-wrap">
 							<NavigationMenuItem>
-								<NavigationMenuTrigger className="bg-transparent">Lessons</NavigationMenuTrigger>
+								<NavigationMenuTrigger className="bg-transparent">Lekcje</NavigationMenuTrigger>
 								<NavigationMenuContent>
 									<div className="flex flex-row">
 										<NavigationMenuLink asChild>
