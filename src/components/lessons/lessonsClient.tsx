@@ -20,7 +20,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 	useEffect(() => {
 		if (
 			level &&
-			(level == "beginner" || level == "intermediate" || level == "advanced") &&
+			(level == "Początkujący" || level == "Średniozaawansowany" || level == "Zaawansowany") &&
 			!checkedTags.includes(level)
 		) {
 			setCheckedTags([level]);
@@ -43,7 +43,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 				acc.push(lesson.lesson.tags.skill_level);
 			}
 			acc.sort((a, b) => {
-				const order = ["beginner", "intermediate", "advanced"];
+				const order = ["Początkujący", "Średniozaawansowany", "Zaawansowany"];
 				return order.indexOf(a) - order.indexOf(b);
 			});
 			return acc;
