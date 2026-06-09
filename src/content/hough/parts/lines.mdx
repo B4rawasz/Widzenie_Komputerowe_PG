@@ -1,0 +1,43 @@
+---
+title: "Hough Liniowy"
+order: 1
+icon: Ruler
+---
+
+import { HoughTransform } from "@/modules/hough/HoughTransform";
+
+Wykrywanie prostych to najczęstsze zastosowanie transformacji Hougha. Choć w szkole uczymy się wzoru $y = ax + b$, w informatyce jest on niepraktyczny, ponieważ współczynnik $a$ dąży do nieskończoności dla linii pionowych.
+
+### Model $(\rho, \theta)$
+
+Zamiast tego używamy reprezentacji biegunowej (normalnej), gdzie prosta jest opisana przez:
+- $\theta$: Kąt nachylenia normalnej do prostej ($0^\circ$ do $180^\circ$).
+- $\rho$: Odległość prostej od środka układu współrzędnych.
+
+Równanie prostej przyjmuje postać:
+$$ \rho = x \cos \theta + y \sin \theta $$
+
+### Jak działa głosowanie?
+
+Dla każdego piksela krawędziowego $(x_i, y_i)$:
+1.  Przechodzimy przez wszystkie możliwe kąty $\theta$ (np. co $1^\circ$).
+2.  Obliczamy odpowiadającą wartość $\rho$.
+3.  Zwiększamy licznik w akumulatorze w komórce $(\rho, \theta)$.
+
+W przestrzeni Hougha jeden punkt z obrazu staje się **sinusoidą**. Jeśli wiele punktów leży na jednej prostej, ich sinusoidy przetną się w jednym punkcie $(\rho, \theta)$ — to jest nasz **Peak**.
+
+> [!IMPORTANT]
+> Jasna plama w akumulatorze to dowód na istnienie prostej. Im jaśniejsza plama, tym więcej pikseli tworzy daną linię.
+
+---
+
+### Interaktywna detekcja linii
+
+Wczytaj przykładowy obraz lub narysuj własne linie. 
+- Najedź kursorem na jasne punkty w **Akumulatorze**, aby zobaczyć, której prostej odpowiadają.
+- Manipuluj suwakiem **Min. głosów**, aby odfiltrować krótkie lub przypadkowe linie.
+
+<HoughTransform type="lines" />
+
+> [!TIP]
+> Zauważ, że idealna prosta tworzy w akumulatorze bardzo wyraźny, punktowy peak. Jeśli linia jest lekko rozmyta lub zakrzywiona, peak staje się rozmazaną plamą.
