@@ -395,7 +395,12 @@ function DigitCanvas({ onPixelsChange }: { onPixelsChange: (pixels: number[]) =>
 	}
 
 	useEffect(() => {
-		clear();
+		const ctx = canvasRef.current?.getContext("2d");
+		if (ctx) {
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+			drawGrid();
+		}
 	}, []);
 
 	// Draw grid overlay
