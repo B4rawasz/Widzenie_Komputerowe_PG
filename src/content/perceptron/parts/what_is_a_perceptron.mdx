@@ -1,11 +1,43 @@
 ---
 title: "Czym jest perceptron?"
 order: 1
-icon: CircleQuestionMark
+icon: HelpCircle
 ---
 
 import { Perceptron, PerceptronProvider } from "@/modules/perceptron/Perceptron";
 
+Perceptron to najprostsza jednostka obliczeniowa, która imituje działanie pojedynczego neuronu. Jego zadaniem jest przetworzenie wielu sygnałów wejściowych i wygenerowanie jednej, binarnej decyzji: **TAK** (1) lub **NIE** (0).
+
+### Anatomia neuronu
+
+Każdy perceptron składa się z czterech głównych elementów:
+
+1.  **Wejścia ($x_1, x_2, \dots$ )**: To dane, które dostarczamy do systemu (np. jasność piksela, długość krawędzi).
+2.  **Wagi ($w_1, w_2, \dots$ )**: Każde wejście ma swoją wagę, która określa, jak istotna jest ta cecha dla ostatecznej decyzji.
+3.  **Suma ważona**: Perceptron mnoży każde wejście przez jego wagę i dodaje je do siebie.
+4.  **Próg (Bias)**: Stała wartość dodawana do sumy, która pozwala kontrolować, jak łatwo neuron ma się "aktywować".
+
+### Mechanizm decyzji
+
+Wewnątrz perceptronu dzieje się prosta operacja matematyczna:
+$$ \text{Suma} = x_1 \cdot w_1 + x_2 \cdot w_2 + \text{bias} $$
+
+Jeśli **Suma $\geq 0$**, perceptron zwraca **1**. W przeciwnym razie zwraca **0**.
+
+> [!NOTE]
+> Zmieniając wagi, zmieniamy to, na co neuron zwraca uwagę. Jeśli $w_1$ jest duże i dodatnie, to wysokie $x_1$ mocno zachęca neuron do zwrócenia jedynki.
+
+---
+
+### Eksperymentuj z wagami
+
+Na poniższym schemacie możesz ręcznie sterować wejściami i wagami. 
+- Zobacz, jak zmienia się suma wewnątrz "komórki" (prostokąt w środku).
+- Obserwuj, kiedy neuron zmienia kolor na **niebieski** (wynik 1) lub **czerwony** (wynik 0).
+
 <PerceptronProvider>
 	<Perceptron type={"basic"}/>
 </PerceptronProvider>
+
+> [!TIP]
+> Spróbuj ustawić obie wagi na wartości ujemne. Zauważysz, że teraz neuron działa jak "odwracacz" — im większe sygnały wejściowe, tym trudniej mu osiągnąć wynik 1.

@@ -1,11 +1,39 @@
 ---
-title: "Reguła korekty"
+title: "Reguła korekty (Uczenie)"
 order: 2
 icon: Lightbulb
 ---
 
 import { Perceptron, PerceptronProvider } from "@/modules/perceptron/Perceptron";
 
+Skąd perceptron wie, jakie wagi ustawić? Nie robi tego człowiek — robi to algorytm poprzez proces **uczenia nadzorowanego**. Perceptron uczy się na własnych błędach, korygując wagi tak długo, aż zacznie podawać poprawne wyniki.
+
+### Reguła Delty (Delta Rule)
+
+Podstawowa zasada uczenia perceptronu jest prosta: jeśli neuron się pomylił, zmień wagi w stronę, która zmniejszy ten błąd. Matematycznie opisuje to wzór:
+
+$$ w_{i(nowa)} = w_{i(stara)} + \eta \cdot (d - y) \cdot x_i $$
+
+Gdzie:
+- $(d - y)$: To **błąd** (różnica między wynikiem pożądanym $d$, a otrzymanym $y$).
+- $\eta$ (eta): To **współczynnik uczenia** (learning rate) — określa, jak duże kroki stawiamy przy każdej poprawce.
+- $x_i$: Sygnał wejściowy, który "zawinił" przy błędzie.
+
+> [!IMPORTANT]
+> Jeśli błąd wynosi zero ($d - y = 0$), wagi nie zmieniają się. Perceptron osiągnął stan stabilny dla danej próbki.
+
+---
+
+### Zobacz naukę w akcji
+
+W tym module możesz przetestować proces automatycznej korekty:
+1.  Ustaw dowolne wartości wejściowe $x_1, x_2$.
+2.  Wybierz **Predicted output** (czyli to, co perceptron *powinien* odpowiedzieć).
+3.  Naciśnij **Train** i obserwuj, jak wagi ($w_1, w_2$) i bias płynnie zmieniają się, aż błąd spadnie do zera.
+
 <PerceptronProvider>
 	<Perceptron type={"training"}/>
 </PerceptronProvider>
+
+> [!TIP]
+> Zauważ, że jeśli perceptron już na starcie podaje dobry wynik, przycisk `Train` nie zmieni wag. Algorytm "wie", że nie musi nic poprawiać.

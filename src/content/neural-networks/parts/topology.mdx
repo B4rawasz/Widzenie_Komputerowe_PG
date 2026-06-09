@@ -1,0 +1,39 @@
+---
+title: "Od perceptronu do MLP"
+order: 1
+icon: Network
+---
+
+import { NeuralNetwork } from "@/modules/neural-networks/NeuralNetworks";
+
+Wielowarstwowy Perceptron (ang. *Multilayer Perceptron*, MLP) to rozwinięcie idei sztucznego neuronu. Zamiast jednego elementu, mamy ich setki lub tysiące, ułożone w uporządkowane grupy zwane **warstwami**.
+
+### Struktura warstwowa
+
+W typowej sieci MLP wyróżniamy trzy rodzaje warstw:
+
+1.  **Warstwa wejściowa (Input Layer)**: Odbiera surowe dane (np. piksele obrazu). Liczba neuronów odpowiada liczbie cech wejściowych.
+2.  **Warstwy ukryte (Hidden Layers)**: Tu dzieje się "magia". Neurony w tych warstwach uczą się rozpoznawać coraz bardziej złożone abstrakcje — od krawędzi, przez kształty, aż po konkretne obiekty.
+3.  **Warstwa wyjściowa (Output Layer)**: Podaje końcowy wynik (np. prawdopodobieństwo, że obraz przedstawia cyfrę '5').
+
+### Przepływ sygnału (Forward Pass)
+
+Dane płyną przez sieć w jednym kierunku. Każdy neuron w warstwie $N$ jest połączony z **każdym** neuronem w warstwie $N+1$. To połączenie ("każdy z każdym") nazywamy warstwą **w pełni połączoną** (ang. *Fully Connected* lub *Dense*).
+
+> [!IMPORTANT]
+> To właśnie liczba i rozmiar warstw ukrytych decydują o "pojemności intelektualnej" sieci. Zbyt mała sieć nie nauczy się zadania, zbyt duża — zapamięta dane na pamięć (overfitting).
+
+---
+
+### Eksperymentuj z topologią
+
+Poniżej możesz samodzielnie zbudować architekturę sieci. 
+- Dodawaj i usuwaj warstwy ukryte.
+- Zmieniaj liczbę neuronów w każdej warstwie (przyciski `+` / `−`).
+- Zmieniaj wartości sygnałów wejściowych ($x_1, x_2$) i obserwuj, jak aktywacje (kolory kółek) i wagi (linie) zmieniają się na żywo.
+- Kliknij dowolny neuron, aby zobaczyć jego dokładną wartość i wagi połączeń.
+
+<NeuralNetwork type="mlp-topology" />
+
+> [!TIP]
+> Zauważ, że linie mają różne kolory. **Czerwony** zwykle oznacza wagi dodatnie (pobudzające), a **niebieski** ujemne (hamujące). Grubość linii odpowiada sile połączenia.

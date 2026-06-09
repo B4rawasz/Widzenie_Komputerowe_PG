@@ -1,0 +1,36 @@
+---
+title: "Rozpoznawanie cyfr"
+order: 2
+icon: Binary
+---
+
+import { NeuralNetwork } from "@/modules/neural-networks/NeuralNetworks";
+
+Jednym z klasycznych wyzwań w widzeniu komputerowym jest rozpoznawanie pisma ręcznego. Prześledzimy to na przykładzie uproszczonego zbioru danych, gdzie cyfry są zapisane na siatce $28 \times 28$ pikseli.
+
+### Od obrazu do wektora
+
+Jak przekazać obraz do sieci neuronowej? Musimy go "spłaszczyć". 
+Obraz $28 \times 28$ pikseli to w rzeczywistości $784$ małe punkty. Sieć neuronowa widzi to jako długi ciąg (wektor) $784$ liczb, gdzie każda liczba to jasność konkretnego piksela (0 dla czarnego, 1 dla białego).
+
+Nasza przykładowa sieć ma architekturę:
+**$784$ (In) $\rightarrow$ $64$ (H1) $\rightarrow$ $32$ (H2) $\rightarrow$ $10$ (Out)**
+
+### Proces rozpoznawania
+
+1.  **Warstwa wejściowa** przyjmuje 784 wartości jasności.
+2.  **Warstwy ukryte** przetwarzają te informacje. Pierwsza warstwa szuka prostych kresek i łuków, druga łączy je w bardziej złożone wzory typowe dla konkretnych cyfr.
+3.  **Warstwa wyjściowa** ma 10 neuronów — po jednym dla każdej cyfry (0–9). Neuron o najwyższej aktywności wskazuje wynik predykcji.
+
+---
+
+### Narysuj cyfrę
+
+Sprawdź, jak radzi sobie sieć wytrenowana na tysiącach przykładów ludzkiego pisma. 
+- Narysuj cyfrę w czarnym polu (LPM - rysuj, PPM - gumka).
+- Obserwuj słupek **Aktywacji wyjściowych** — pokazuje on, jak bardzo sieć jest przekonana do każdej z cyfr.
+
+<NeuralNetwork type="digit-recognizer" />
+
+> [!NOTE]
+> Zauważ sekcję "Warstwa ukryta". Każdy mały kwadracik to aktywacja jednego neuronu. Zobacz, jak zmieniają się ich wzory, gdy rysujesz "1" (pionowa kreska) a jak przy "0" (koło). Sieć "widzi" cechy geometryczne, które my rozpoznajemy podświadomie.

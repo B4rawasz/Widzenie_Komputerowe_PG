@@ -1,0 +1,40 @@
+---
+title: "Pewność decyzji (Softmax)"
+order: 4
+icon: Thermometer
+---
+
+import { NeuralNetwork } from "@/modules/neural-networks/NeuralNetworks";
+
+Ostatnia warstwa sieci produkuje surowe wartości liczbowe, zwane **logitami**. Mogą one przyjmować dowolne wartości, co utrudnia ich interpretację. Aby uzyskać wynik w postaci prawdopodobieństwa, używamy funkcji **Softmax**.
+
+### Funkcja Softmax
+
+Softmax normalizuje logity ($z_i$) tak, aby wszystkie wyniki sumowały się do 1 (100%):
+$$ \sigma(\mathbf{z})_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}} $$
+Gdzie $T$ to **Temperatura** — parametr kontrolujący "ostrość" rozkładu.
+
+### Rola temperatury
+
+Zmiana temperatury pozwala na modelowanie pewności sieci:
+- **Niska temperatura ($T < 1$)**: "Wyostrza" różnice. Nawet mała przewaga jednego logitu sprawia, że dostaje on prawie 100% prawdopodobieństwa. Sieć staje się bardzo pewna siebie.
+- **Wysoka temperatura ($T > 1$)**: "Spłaszcza" rozkład. Różnice między cyframi zacierają się, a sieć staje się niepewna (wszystkie cyfry wydają się równie prawdopodobne).
+
+### Miara niepewności: Entropia
+
+Używamy **Entropii Shannona**, aby zmierzyć, jak bardzo rozmyty jest wynik sieci. 
+- Entropia bliska **0** oznacza, że sieć jest pewna jednego wyniku.
+- Wysoka entropia oznacza, że sieć widzi "szum" lub kształt, który pasuje do wielu klas jednocześnie.
+
+---
+
+### Eksperyment z prawdopodobieństwem
+
+Narysuj cyfrę i manipuluj suwakiem **Temperatura**.
+- Zobacz, jak zmieniają się słupki Softmax względem surowych logitów (jasnoszare paski).
+- Obserwuj wskaźnik **Entropii** — zobacz, jak rośnie, gdy rysujesz coś niejednoznacznego (np. kształt pomiędzy '1' a '7').
+
+<NeuralNetwork type="softmax-viz" />
+
+> [!IMPORTANT]
+> W praktycznych systemach (np. autonomicznych autach) wysoka entropia jest sygnałem ostrzegawczym: "Nie jestem pewien co widzę, potrzebuję pomocy człowieka!".
