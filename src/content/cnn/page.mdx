@@ -1,0 +1,80 @@
+---
+title: "Konwolucyjne sieci neuronowe"
+order: 7
+icon: BrainCircuit
+description: |
+  Konwolucyjne sieci neuronowe (CNN) to fundament współczesnego widzenia komputerowego.
+  Poznasz działanie filtrów konwolucyjnych, map cech, hierarchii reprezentacji,
+  różnicę CNN vs MLP oraz metodę wizualizacji uwagi Grad-CAM.
+tags:
+  skill_level: "intermediate"
+  topic:
+    - "convolutional neural networks"
+    - "feature maps"
+    - "filters"
+    - "grad-cam"
+    - "deep learning"
+coverImage: "/covers/cover.png"
+---
+
+import {
+  ConvolutionFiltersDemo,
+  FeatureMapsDemo,
+  FeatureHierarchyDemo,
+  CnnVsMlpDemo,
+  GradCamDemo,
+} from "@/modules/cnn/ConvolutionalNetworks";
+
+## Filtry konwolucyjne
+
+Podstawowym elementem CNN jest **filtr** (jądro splotu) — mała macierz wag 3×3 (lub 5×5, 7×7), która przesuwa się po obrazie wejściowym i oblicza iloczyn skalarny z każdym oknem receptywnym. Każdy filtr uczy się wykrywać inny lokalny wzorzec: krawędź pionową, poziomą, gradient ukośny.
+
+Wzór operacji splotu:
+
+```
+(I * K)(x, y) = Σ Σ I(x+i, y+j) · K(i, j)
+```
+
+**Wybierz filtr i obserwuj jego odpowiedź nakładaną na obraz wejściowy. Suwak kontroluje intensywność nakładki.**
+
+<ConvolutionFiltersDemo />
+
+---
+
+## Mapy cech (feature maps)
+
+Wynikiem zastosowania filtra do całego obrazu jest **mapa cech**. Warstwa konwolucyjna z _K_ filtrami produkuje _K_ map cech — każda odpowiada jednemu filtrowi i representuje inny aspekt obrazu.
+
+**Kliknij dowolną mapę, aby ją powiększyć i zbadać aktywacje.**
+
+<FeatureMapsDemo />
+
+---
+
+## Hierarchia cech
+
+Głębokość sieci przekłada się na **hierarchię abstrakcji**: wczesne warstwy wykrywają proste cechy (krawędzie, gradienty), głębsze składają je w złożone wzorce (narożniki, kształty, obiekty).
+
+**Przełącz między warstwami conv1 i conv2 i porównaj charakter aktywacji.**
+
+<FeatureHierarchyDemo />
+
+---
+
+## CNN vs MLP — niezmienność na translację
+
+Klasyczna sieć MLP uczy się absolutnych pozycji pikseli — przesunięcie obiektu powoduje drastyczny spadek pewności klasyfikacji. CNN dzięki splotowi i operacji max-pooling wykazuje **niezmienność na translację**: ta sama cecha jest wykrywana niezależnie od położenia na obrazie.
+
+**Przesuń cyfrę suwakiem i porównaj pewność klasyfikacji obu modeli.**
+
+<CnnVsMlpDemo />
+
+---
+
+## Grad-CAM
+
+**Gradient-weighted Class Activation Mapping** pozwala zobaczyć, _które fragmenty obrazu_ miały największy wpływ na decyzję sieci dla wybranej klasy. Metoda oblicza gradient straty względem map cech ostatniej warstwy konwolucyjnej, uśrednia po kanałach i nakłada jako heatmapę na obraz wejściowy.
+
+**Wybierz klasę docelową i obserwuj heatmapę uwagi sieci.**
+
+<GradCamDemo />
