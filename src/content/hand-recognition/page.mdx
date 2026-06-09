@@ -1,23 +1,58 @@
 ---
-title: "Hand Recognition"
+title: "Projekt: Rozpoznawanie dłoni"
 order: 9
 icon: Hand
 description: |
-  Discover practical hand recognition techniques used in computer vision.
-  This module demonstrates applications for detecting and analyzing hands.
+  Studium przypadku budowy kompletnej aplikacji Computer Vision w przeglądarce. Prześledzimy proces od konfiguracji akceleracji GPU, przez obsługę kamery, aż po zaawansowaną analizę gestów w 3D.
 tags:
-  skill_level: "advanced"
+  skill_level: "Zaawansowany"
   topic:
-    - "hand recognition"
-    - "gesture detection"
-    - "image processing"
-    - "pose estimation"
-    - "tracking"
+    - "Projekt praktyczny"
+    - "MediaPipe"
+    - "Estymacja pozy"
+    - "Interakcja 3D"
 coverImage: "/covers/cover.png"
 ---
 
 import HandRecognition from "@/modules/hand-recognition/HandRecognition";
 
+### Od teorii do implementacji
+
+W poprzednich modułach poznałeś fundamenty: krawędzie, sieci neuronowe i detekcję obiektów. Teraz czas połączyć tę wiedzę w praktyczny projekt. **Rozpoznawanie dłoni** to jedno z najtrudniejszych zadań wizyjnych, wymagające jednoczesnej detekcji dłoni i precyzyjnej lokalizacji 21 kluczowych stawów.
+
+W tym module nie tylko zobaczysz wynik końcowy, ale krok po kroku przeanalizujesz proces budowy takiej aplikacji. Dowiesz się, jak wykorzystać moc karty graficznej w przeglądarce i jak zamienić surowe współrzędne w interaktywne gesty.
+
+> [!IMPORTANT]
+> Ten moduł pełni rolę **walkthrough** — przewodnika po architekturze nowoczesnego systemu wizyjnego czasu rzeczywistego.
+
+---
+
+### Czego nauczysz się w tym projekcie?
+
+Przejdziemy przez pięć kluczowych etapów inżynieryjnych:
+
+1.  **Fundamenty i Architektura**
+    Konfiguracja silnika matematycznego TensorFlow.js i potoku MediaPipe.
+    
+2.  **Kamera i Detektor**
+    Zarządzanie strumieniem wideo i inicjalizacja modelu na GPU.
+
+3.  **Pętla Detekcji**
+    Synchronizacja analizy obrazu z odświeżaniem ekranu (60 FPS).
+
+4.  **Wizualizacja**
+    Rysowanie szkieletu dłoni na elemencie Canvas.
+
+5.  **Gesty i Pomiary 3D**
+    Wykorzystanie geometrii analitycznej do wykrywania interakcji użytkownika.
+
+---
+
+### Demo projektu
+
+Poniżej możesz przetestować gotową aplikację. Spróbuj zbliżyć kciuk do palca wskazującego — zobaczysz, jak system mierzy odległość i reaguje na Twój gest.
+
 <HandRecognition />
 
-Implementacja detekcji gestów w czasie rzeczywistym.
+> [!TIP]
+> Zwróć uwagę na płynność działania. System analizuje Twoją dłoń całkowicie lokalnie, na Twoim sprzęcie, zapewniając pełną prywatność i zerowe opóźnienia sieciowe.
