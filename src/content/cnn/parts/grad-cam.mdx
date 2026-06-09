@@ -1,0 +1,38 @@
+---
+title: "Grad-CAM"
+order: 5
+icon: Eye
+---
+
+import { GradCamDemo } from "@/modules/cnn/ConvolutionalNetworks";
+
+Sieci neuronowe często nazywa się "czarnymi skrzynkami" (ang. *black boxes*), ponieważ trudno jest zrozumieć, dlaczego model podjął taką, a nie inną decyzję. **Grad-CAM** (Gradient-weighted Class Activation Mapping) to technika, która pozwala zajrzeć do środka i zobaczyć "uwagę" sieci.
+
+### Jak sieć "patrzy"?
+
+Grad-CAM generuje heatmapę, która pokazuje, które fragmenty obrazu wejściowego miały największy wpływ na konkretną predykcję. 
+
+Działa to poprzez analizę gradientów: 
+1. Wybieramy konkretną klasę (np. "Cyfra 8").
+2. Sprawdzamy, jak mapy cech ostatniej warstwy splotowej reagują na tę klasę.
+3. Ważymy te mapy przez ich gradienty, aby dowiedzieć się, które regiony w przestrzeni obrazu są "ważne".
+
+### Dlaczego to jest ważne?
+
+Wizualizacja uwagi pozwala na:
+- **Debugowanie modelu**: Możemy odkryć, że sieć rozpoznaje "psa" tylko dlatego, że na zdjęciu jest trawa.
+- **Zaufanie**: W medycynie lekarz musi wiedzieć, że AI wykryło chorobę na podstawie rzeczywistych zmian patologicznych, a nie przypadkowych artefaktów zdjęcia.
+
+---
+
+### Wizualizacja uwagi
+
+Przetestuj działanie Grad-CAM dla czterech różnych cyfr.
+- Wybierz cyfrę za pomocą przycisków.
+- Obserwuj **Heatmapę**: kolory od niebieskiego (brak uwagi) do czerwonego (maksymalna uwaga).
+- Suwak **Heatmapa** pozwoli Ci dostosować widoczność nałożonej warstwy.
+
+<GradCamDemo />
+
+> [!NOTE]
+> Zwróć uwagę na cyfrę **0**. Sieć skupia swoją uwagę głównie na owalnym konturze, ignorując środek. W przypadku cyfry **8** uwaga rozkłada się na dwie wyraźne pętle. To dowodzi, że model faktycznie nauczył się rozpoznawać strukturę geometryczną tych znaków!

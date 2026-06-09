@@ -1,0 +1,37 @@
+---
+title: "Hierarchia cech"
+order: 3
+icon: Layers
+---
+
+import { FeatureHierarchyDemo } from "@/modules/cnn/ConvolutionalNetworks";
+
+Głębokość sieci neuronowej (liczba kolejnych warstw) nie służy jedynie zwiększeniu mocy obliczeniowej. Prowadzi ona do powstania **hierarchii reprezentacji**, która naśladuje sposób, w jaki my rozpoznajemy obiekty.
+
+### Piramida abstrakcji
+
+Przechodząc przez kolejne warstwy, sieć buduje coraz bardziej złożoną wiedzę:
+
+1.  **Wczesne warstwy (`conv1`)**: Szukają prostych, atomowych cech. Są to głównie krawędzie w różnych kierunkach i punkty. Reagują na surowe zmiany kontrastu.
+2.  **Średnie warstwy (`conv2`, `conv3`)**: Łączą cechy z poprzedniej warstwy. Z krawędzi powstają narożniki, łuki i proste tekstury (np. paski, kratki).
+3.  **Głębokie warstwy**: Rozpoznają całe części obiektów (np. koło samochodu, oko psa) i ostatecznie całe obiekty.
+
+### Dlaczego hierarchia jest ważna?
+
+Dzięki takiemu podejściu, sieć jest bardzo elastyczna. Wiedza o tym, jak rozpoznać "krawędź pionową", jest przydatna zarówno przy rozpoznawaniu wieżowca, jak i nogi od stołu. Sieć nie musi uczyć się wszystkiego od zera dla każdego nowego obiektu.
+
+> [!IMPORTANT]
+> To zjawisko nazywamy **składalnością** (ang. *compositionality*). Złożone obiekty są budowane z prostszych klocków znalezionych w warstwach bliższych wejściu.
+
+---
+
+### Porównanie warstw
+
+Sprawdź, jak zmienia się charakter map cech w zależności od głębokości:
+- W warstwie **conv1** zobaczysz ostre, precyzyjne krawędzie.
+- Przełącz na **conv2**. Zauważysz, że aktywacje stają się bardziej rozmyte i "plamiste" — sieć zaczyna szukać specyficznych układów krawędzi (np. narożników czy zamkniętych kształtów).
+
+<FeatureHierarchyDemo />
+
+> [!TIP]
+> Zauważ, że w głębszych warstwach "szum" tła znika. Sieć staje się ślepa na nieistotne detale, skupiając się tylko na tych strukturach, które niosą znaczenie semantyczne.

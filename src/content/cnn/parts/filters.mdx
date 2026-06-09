@@ -1,0 +1,44 @@
+---
+title: "Filtry konwolucyjne"
+order: 1
+icon: Grid3X3
+---
+
+import { ConvolutionFiltersDemo } from "@/modules/cnn/ConvolutionalNetworks";
+
+Podstawową cegiełką sieci CNN jest **filtr** (często nazywany jądrem splotu lub *kernelem*). To mała macierz liczb, zazwyczaj o rozmiarze $3 \times 3$ lub $5 \times 5$, która "przeszukuje" obraz w poszukiwaniu konkretnych wzorców.
+
+### Mechanizm przesuwnego okna
+
+Filtr przesuwa się nad obrazem piksel po pikselu. W każdym położeniu wykonuje operację **iloczynu skalarnego**: mnoży swoje wagi przez wartości pikseli, które aktualnie "widzi", i dodaje te wyniki do siebie.
+
+Wynik splotu dla jednego okna to:
+$$ y = \sum_{i=1}^m \sum_{j=1}^n I(x_i, y_j) \cdot K(i, j) + b $$
+
+Gdzie:
+- $I$: Fragment obrazu wejściowego.
+- $K$: Macierz wag filtra.
+- $b$: Obciążenie (bias).
+
+### Rodzaje filtrów
+
+W tradycyjnym przetwarzaniu obrazu inżynierowie ręcznie projektowali filtry (np. Sobel do krawędzi). W sieciach neuronowych, **wagi filtrów są uczone automatycznie** podczas procesu treningu!
+
+Oto kilka klasycznych przykładów, które sieć często odnajduje sama:
+- **Krawędziowe**: Szukają nagłych zmian jasności.
+- **Wygładzające**: Uśredniają sąsiedztwo, redukując szum.
+- **Wyostrzające**: Podbijają różnice między środkowym pikselem a otoczeniem.
+
+---
+
+### Eksperymentuj z filtrami
+
+Wybierz filtr z listy i zobacz, jak reaguje on na scenę testową.
+- **Czerwone komórki** w jądrze to wagi ujemne.
+- **Niebieskie komórki** to wagi dodatnie.
+- Suwak **Nakładka** pozwala Ci porównać wynik splotu (kolor pomarańczowy) z oryginalnym obrazem.
+
+<ConvolutionFiltersDemo />
+
+> [!TIP]
+> Zauważ, że jądro **Sobel X** ma zera w środkowej kolumnie. To sprawia, że filtr "ignoruje" pionowe linie, które idealnie na tę kolumnę trafią, reagując tylko na różnice jasności między lewą a prawą stroną — czyli wykrywa krawędzie pionowe.

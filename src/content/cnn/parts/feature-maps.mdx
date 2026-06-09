@@ -1,0 +1,35 @@
+---
+title: "Mapy cech (Feature Maps)"
+order: 2
+icon: LayoutGrid
+---
+
+import { FeatureMapsDemo } from "@/modules/cnn/ConvolutionalNetworks";
+
+Gdy zastosujemy filtr konwolucyjny do całego obrazu, wynikiem nie jest pojedyncza liczba, lecz nowy obraz — **mapa cech**. Pokazuje ona "gdzie" w obrazie wejściowym filtr znalazł to, czego szukał.
+
+### Wizualna detekcja
+
+Mapa cech to zapis aktywności neuronów. 
+- **Jasne (kolorowe) obszary** oznaczają silną aktywację: w tym miejscu cecha (np. krawędź ukośna) występuje z dużym natężeniem.
+- **Ciemne obszary** oznaczają brak dopasowania wzorca.
+
+### Wielowymiarowe widzenie
+
+Warstwa konwolucyjna zazwyczaj posiada od kilkunastu do kilkuset filtrów. Każdy z nich produkuje osobną mapę cech. W efekcie, po przejściu przez warstwę splotową, obraz zamienia się w "kostkę" danych, gdzie każdy "kanał" niesie informację o innym aspekcie wizualnym (pionach, poziomach, kolorach, teksturach).
+
+> [!NOTE]
+> Mapy cech są kluczowe dla zrozumienia, jak sieć podejmuje decyzje. Pozwalają one odczytać, na jakich elementach obrazu skupia się model.
+
+---
+
+### Eksploracja map cech
+
+Poniżej zobaczysz 8 map wygenerowanych przez różne filtry dla tej samej sceny.
+- Kliknij na wybraną mapę w dolnym rzędzie, aby zobaczyć jej **powiększenie**.
+- Porównaj, jak różne filtry (np. "Krawędź V" vs "Ukos") inaczej interpretują te same obiekty.
+
+<FeatureMapsDemo />
+
+> [!TIP]
+> Zwróć uwagę na mapę **Laplacian**. Wygląda ona jak szkic konturowy całego obrazu. Jest to filtr drugiego rzędu, który reaguje na każdą zmianę jasności, niezależnie od kierunku.
