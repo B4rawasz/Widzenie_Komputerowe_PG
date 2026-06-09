@@ -1,0 +1,38 @@
+---
+title: "Klasyfikatory Odcinkowo-Liniowe"
+order: 4
+icon: Activity
+---
+
+import { Classifier } from "@/modules/classifiers/Classifiers";
+
+W rzeczywistych problemach dane rzadko dają się rozdzielić jedną prostą. Klasyfikator odcinkowo-liniowy (ang. *piecewise linear*) pozwala na tworzenie granic złożonych z wielu połączonych ze sobą odcinków.
+
+### Dlaczego łamana granica?
+
+Kiedy klasy są "przemieszane" lub jedna klasa otacza drugą, granica musi być elastyczna. Klasyfikator ten buduje **wielokąt decyzyjny**. Każdy bok tego wielokąta to w istocie mały klasyfikator liniowy działający tylko lokalnie.
+
+Zalety tego podejścia:
+- **Większa precyzja**: Można dopasować granicę do bardzo nieregularnych zbiorów danych.
+- **Modelowanie nieliniowe**: Choć każdy element jest liniowy, całość pozwala na modelowanie zależności nieliniowych.
+
+### Ryzyko Overfittingu
+
+Należy pamiętać, że dodawanie nieskończonej liczby segmentów doprowadzi do tzw. **overfittingu** (przeuczenia). Granica będzie idealnie omijać każdy punkt, ale straci zdolność do uogólniania wiedzy na nowe, nieznane wcześniej dane.
+
+> [!CAUTION]
+> Celem klasyfikacji nie jest idealne "opłotowanie" każdego punktu treningowego, ale znalezienie ogólnego trendu podziału danych.
+
+---
+
+### Budowanie własnej granicy
+
+W tym module możesz ręcznie konstruować boki wielokąta decyzyjnego.
+- Przeciągaj **białe uchwyty**, aby zmieniać kształt granicy.
+- Dodawaj nowe odcinki przyciskiem **Dodaj segment**.
+- Staraj się "zamknąć" jedną klasę wewnątrz wielokąta lub oddzielić ją od drugiej tak, by liczba błędów była jak najmniejsza.
+
+<Classifier type="piecewise" />
+
+> [!TIP]
+> Spójrz na to jak na pierwowzór głębokich sieci neuronowych. Wiele warstw neuronów z funkcjami aktywacji (np. ReLU) w efekcie tworzy właśnie taką skomplikowaną, odcinkowo-liniową granicę w wielowymiarowej przestrzeni cech!

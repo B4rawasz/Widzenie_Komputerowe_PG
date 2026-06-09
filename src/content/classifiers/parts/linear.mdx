@@ -1,0 +1,44 @@
+---
+title: "Klasyfikatory Liniowe"
+order: 3
+icon: MoveRight
+---
+
+import { Classifier } from "@/modules/classifiers/Classifiers";
+
+Klasyfikator liniowy to fundamentalne narzędzie w uczeniu maszynowym. Jego zadaniem jest znalezienie linii (w 2D) lub hiperpłaszczyzny (w wyższych wymiarach), która oddziela od siebie dwie klasy danych.
+
+### Model matematyczny
+
+Decyzja podejmowana jest na podstawie kombinacji liniowej cech wejściowych. Równanie granicy decyzyjnej to:
+$$ w_1 x + w_2 y + b = 0 $$
+Gdzie:
+- $w_1, w_2$ to **wagi** (weights) określające nachylenie granicy.
+- $b$ to **obciążenie** (bias) określające przesunięcie linii względem początku układu współrzędnych.
+
+Funkcja decyzyjna ma postać:
+$$ f(x, y) = \text{sign}(w_1 x + w_2 y + b) $$
+
+### Dlaczego klasyfikator liniowy?
+
+Liniowe podejście jest podstawą wielu zaawansowanych metod:
+- **Perceptron**: Najprostsza sieć neuronowa.
+- **Maszyny Wektorów Nośnych (SVM)**: Szukają linii z maksymalnym marginesem bezpieczeństwa.
+- **Regresja logistyczna**: Przewiduje prawdopodobieństwo przynależności do klasy.
+
+> [!IMPORTANT]
+> Klasyfikator liniowy działa idealnie tylko dla zbiorów **liniowo separowalnych** — takich, które faktycznie da się przedzielić jedną prostą bez błędów.
+
+---
+
+### Eksperyment z granicą
+
+Poniżej masz kontrolę nad orientacją i położeniem granicy. 
+- Użyj suwaka **Kąt**, aby zmienić nachylenie ($w_1, w_2$).
+- Użyj suwaka **Przesunięcie**, aby zmienić bias ($b$).
+- Staraj się zminimalizować liczbę błędów (licznik w lewym górnym rogu).
+
+<Classifier type="linear" />
+
+> [!TIP]
+> Spróbuj dodać więcej punktów przyciskiem **Dodaj punkty**. Zobaczysz, że im gęstszy zbiór, tym trudniej znaleźć jedną idealną linię podziału. To prowadzi nas do potrzeby bardziej złożonych granic...

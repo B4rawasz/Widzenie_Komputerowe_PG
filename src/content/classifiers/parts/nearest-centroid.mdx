@@ -1,0 +1,35 @@
+---
+title: "Klasyfikator Minimalnoodległościowy"
+order: 2
+icon: MoveDown
+---
+
+import { Classifier } from "@/modules/classifiers/Classifiers";
+
+Klasyfikator minimalnoodległościowy (ang. *nearest centroid classifier*) to jedna z najprostszych i najbardziej intuicyjnych metod klasyfikacji. Opiera się na geometrycznym środku każdej klasy.
+
+### Centroidy i Odległość Euklidesowa
+
+Dla każdej klasy obliczamy jej **centroid** (środek ciężkości) — punkt, którego współrzędne są średnimi arytmetycznymi współrzędnych wszystkich punktów należących do danej klasy.
+
+Dla nowej próbki $x$, obliczamy odległość euklidesową do wszystkich centroidów $c_i$:
+$$ d(x, c_i) = \sqrt{\sum (x_j - c_{ij})^2} $$
+Punkt zostaje przypisany do klasy, której centroid znajduje się najbliżej.
+
+### Granice decyzyjne i Diagramy Woronoja
+
+Granice decyzyjne w tej metodzie to prostopadłe dwusieczne odcinków łączących centroidy. Jeśli mamy więcej niż dwie klasy, obszary przypisane do poszczególnych centroidów tworzą tzw. **Diagram Woronoja**.
+
+> [!IMPORTANT]
+> Klasyfikator ten zakłada, że klasy są sferyczne (mają podobny rozrzut w każdym kierunku) i są podobnej wielkości. Jeśli jedna klasa jest bardzo wydłużona, a druga skupiona, metoda ta może zawodzić.
+
+---
+
+### Eksploracja przestrzeni Woronoja
+
+Włącz opcję **Obszary decyzyjne**, aby zobaczyć, jak przestrzeń zostaje podzielona na wielokąty. Przeciągaj białe kółko i obserwuj linię przerywaną — pokazuje ona aktualną odległość do zwycięskiego centroidu (oznaczonego symbolem ◆).
+
+<Classifier type="nearest-centroid" />
+
+> [!TIP]
+> Zauważ, że granice są zawsze liniami prostymi (odcinkami). To sprawia, że klasyfikator jest bardzo szybki, ale mało elastyczny w porównaniu do metody statystycznej.

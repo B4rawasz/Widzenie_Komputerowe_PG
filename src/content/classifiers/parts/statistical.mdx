@@ -1,0 +1,36 @@
+---
+title: "Klasyfikator Statystyczny"
+order: 1
+icon: Sigma
+---
+
+import { Classifier } from "@/modules/classifiers/Classifiers";
+
+Klasyfikator statystyczny (często utożsamiany z klasyfikatorem Bayesa) opiera się na prawdopodobieństwie. Zamiast szukać sztywnej granicy, zadajemy pytanie: *Jakie jest prawdopodobieństwo, że ten punkt należy do danej grupy?*
+
+### Rozkład Normalny i Elipsy
+
+W najprostszej wersji zakładamy, że dane w każdej klasie mają rozkład normalny (Gaussa). Każdą klasę opisują dwa parametry:
+- **Średnia ($\mu$)**: Środek chmury punktów.
+- **Odchylenie standardowe ($\sigma$)**: Mówi o "rozrzucie" danych.
+
+Wizualnie reprezentujemy to za pomocą **elips izoprawdopodobieństwa**. Punkty leżące na tej samej elipsie mają taką samą gęstość prawdopodobieństwa przynależności do klasy.
+
+### Reguła decyzyjna
+
+Dla nowego punktu $x$ obliczamy gęstość prawdopodobieństwa $p(x | \omega_i)$ dla każdej klasy $\omega_i$. Wybieramy tę klasę, dla której ta wartość jest największa:
+$$ \omega^* = \arg \max_{i} p(x | \omega_i) $$
+
+> [!NOTE]
+> Klasyfikator ten świetnie radzi sobie, gdy klasy "zachodzą" na siebie. Pozwala on na zminimalizowanie średniego błędu klasyfikacji, biorąc pod uwagę statystyczną naturę danych.
+
+---
+
+### Eksperyment interaktywny
+
+Przeciągnij **białe kółko** (próbkę testową) po ekranie. Zauważ, jak zmienia ono kolor w zależności od tego, w "polu rażenia" której elipsy się znajduje. Możesz zmienić liczbę klas, aby zobaczyć bardziej złożone interakcje.
+
+<Classifier type="statistical" />
+
+> [!TIP]
+> Zwróć uwagę, że granica między klasami w tym modelu nie musi być linią prostą. Może być krzywą (kwadratową), co wynika z różnic w rozrzucie ($\sigma$) poszczególnych klas.
