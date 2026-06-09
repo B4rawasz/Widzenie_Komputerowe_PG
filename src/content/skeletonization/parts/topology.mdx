@@ -1,0 +1,42 @@
+---
+title: "Miary topologiczne"
+order: 3
+icon: Ruler
+---
+
+import { Skeletonization } from "@/modules/skeletonization/Skeletonization";
+
+Mając graf, możemy opisać obiekt nie za pomocą pikseli, ale za pomocą **liczb**, które są stałe (niezmienniki topologiczne). To pozwala komputerowi na szybką klasyfikację kształtów.
+
+### Podstawowe parametry
+
+Najważniejsze cechy, które możemy wyczytać ze szkieletu to:
+
+-   **Liczba rozgałęzień (Junctions)**: Miejsca, gdzie struktura się dzieli. Wskazuje na złożoność obiektu.
+-   **Liczba końcówek (Endpoints)**: Mówi o tym, jak wiele "odnóg" posiada obiekt.
+-   **Liczba pętli (Loops)**: Kluczowa cecha. Przykładowo, litera 'O' ma jedną pętlę, a 'B' ma dwie.
+-   **Liczba komponentów (Components)**: Informuje, czy obiekt jest spójny, czy składa się z oddzielnych części.
+
+### Charakterystyka Eulera
+
+W analizie obrazu binarnego często używa się liczby Eulera ($\chi$), którą dla szkieletu można uprościć do:
+$$ \chi = C - L $$
+Gdzie $C$ to liczba komponentów, a $L$ to liczba pętli. Jest to potężne narzędzie, bo nie zmienia się przy rozciąganiu czy ściskaniu obiektu.
+
+> [!IMPORTANT]
+> Analiza topologiczna pozwala odróżnić np. cyfrę '8' od '0' (dwie pętle vs jedna) bez względu na to, jak krzywo zostały zapisane.
+
+---
+
+### Analiza w czasie rzeczywistym
+
+Zwróć uwagę na panel statystyk pod suwakami. Zobacz, jak zmieniają się wartości "Loops" i "Intersections" gdy rysujesz pętle lub przecinające się linie.
+
+<Skeletonization type="graph" />
+
+> [!TIP]
+> Spróbuj narysować drukowaną literę **A**. Powinieneś otrzymać:
+> - 1 Loop (pętla w górnej części)
+> - 2 Junctions (punkty styku poprzeczki)
+>
+> Czy Twój rysunek zgadza się z tą "topologiczną definicją"?
