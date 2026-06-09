@@ -1,22 +1,54 @@
 ---
 title: "Szkieletyzacja"
 order: 1
-icon: GitFork
+icon: Bone
 description: |
-  Szkieletyzacja to proces redukcji obrazu do jego szkieletu, czyli do postaci złożonej z linii i punktów.
-  Poznasz różne metody szkieletyzacji oraz ich zastosowania.
+  Szkieletyzacja to proces redukcji obrazu binarnego do jego "strukturalnego rdzenia". Pozwala na ekstrakcję topologii obiektu, zachowując jego kształt i łączność w minimalnej formie.
 tags:
-  skill_level: "beginner"
+  skill_level: "Początkujący"
   topic:
-    - "skeletonization"
-    - "image processing"
-    - "pruning"
+    - "Szkieletyzacja"
+    - "Topologia"
+    - "Przetwarzanie obrazów"
+    - "Analiza grafów"
 coverImage: "/covers/cover.png"
 ---
 
-import { Skeletonization } from "@/modules/skeletonization/Skeletonization";
+### Istota szkieletyzacji
 
-<Skeletonization type={"basic"}/>
+Szkieletyzacja (ang. *skeletonization*) to technika morfologiczna, która przekształca obiekty na obrazie w ich jednowymiarowe reprezentacje — tzw. **szkielety**. Możesz o tym myśleć jak o wyodrębnianiu "drucianego modelu" z litej bryły.
 
-<Skeletonization type={"graph"}/>
+Prawidłowo wygenerowany szkielet musi spełniać dwa warunki:
+1.  **Topologiczna równoważność**: Musi zachowywać tę samą liczbę dziur i komponentów co oryginał.
+2.  **Geometryczna centralność**: Linie szkieletu powinny przebiegać dokładnie przez środek grubości obiektu.
 
+> [!IMPORTANT]
+> Szkieletyzacja drastycznie upraszcza opis obiektu. Zamiast analizować tysiące pikseli, możemy operować na zbiorze połączonych linii i punktów węzłowych.
+
+---
+
+### Zastosowania
+
+Gdzie "druciany model" jest lepszy od pełnego obrazu?
+- **Rozpoznawanie tekstu (OCR)**: Analiza struktury liter (gdzie się przecinają, gdzie kończą).
+- **Analiza linii papilarnych**: Identyfikacja punktów charakterystycznych (minucji) na szkielecie linii.
+- **Biologia i medycyna**: Analiza sieci naczyń krwionośnych, dendrytów neuronów czy struktury liści.
+- **Weryfikacja podpisów**: Porównywanie dynamiki i topologii kreślenia linii.
+
+---
+
+### Ścieżka edukacyjna
+
+W tym module prześledzimy proces od surowego obrazu do pełnej analizy topologicznej:
+
+1.  **Algorytmy szkieletyzacji**
+    Poznasz dwie główne szkoły: iteracyjne "obieranie" obrazu (Thinning) oraz metody oparte na mapie odległości (Distance Transform).
+
+2.  **Pruning i konwersja do grafu**
+    Dowiesz się, jak oczyścić szkielet z szumu i przekształcić go w strukturę danych zrozumiałą dla algorytmów — graf.
+
+3.  **Miary topologiczne**
+    Nauczysz się wyciągać konkretne liczby z obrazu: ile jest rozgałęzień, ile pętli i jak to definiuje dany obiekt.
+
+> [!TIP]
+> Szkieletyzacja jest bardzo wrażliwa na jakość obrazu wejściowego. Nawet mały szum na krawędzi może wygenerować "fałszywą kość". Dlatego tak ważny jest etap czyszczenia (pruningu), o którym przeczytasz w dalszych częściach.

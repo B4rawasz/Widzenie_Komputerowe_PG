@@ -1,0 +1,39 @@
+---
+title: "Bounding Boxes i IoU"
+order: 1
+icon: Square
+---
+
+import { ObjectDetection } from "@/modules/object-detection/ObjectDetection";
+
+W detekcji obiektów, "wynikiem" działania sieci nie jest jedna liczba, lecz zestaw współrzędnych opisujących położenie obiektu. Ten prostokąt nazywamy **Bounding Box** (BBox).
+
+### Geometria BBox
+
+Każdy BBox jest opisany przez:
+-   **Współrzędne $(x, y)$**: Zazwyczaj lewy górny róg obiektu.
+-   **Wymiary $(w, h)$**: Szerokość i wysokość.
+-   **Confidence Score**: Liczba od 0 do 1, mówiąca o tym, jak bardzo model jest pewny, że w tym polu znajduje się obiekt danej klasy.
+
+### Intersection over Union (IoU)
+
+Jak zmierzyć, czy nasz BBox jest "dobry"? Używamy do tego miary **IoU** (często nazywanej współczynnikiem Jaccarda). Jest to stosunek pola powierzchni części wspólnej dwóch prostokątów do pola powierzchni ich sumy:
+
+$$ IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}} $$
+
+-   **IoU = 1**: Idealne pokrycie.
+-   **IoU > 0.5**: Uznawane za poprawną detekcję w wielu konkursach (np. COCO).
+-   **IoU = 0**: Brak kontaktu między prostokątami.
+
+---
+
+### Eksperyment z pokryciem
+
+Poniżej zobaczysz scenę z nałożonymi detekcjami.
+-   Użyj suwaka **Score threshold**, aby odfiltrować mniej pewne prostokąty (te o niskim confidence score).
+-   Klikaj przyciski podświetlające pary (np. **Box 1 ↔ Box 2**), aby zobaczyć wyliczone dla nich **IoU** w czasie rzeczywistym.
+
+<ObjectDetection type="bbox-iou" />
+
+> [!NOTE]
+> Zauważ, że niektóre obiekty (jak samochody) mają po kilka nakładających się na siebie prostokątów. To częste zjawisko w surowym wyniku sieci neuronowej. Aby to naprawić, potrzebujemy algorytmu NMS, który poznasz w następnej części.

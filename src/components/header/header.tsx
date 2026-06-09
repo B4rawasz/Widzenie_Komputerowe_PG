@@ -27,32 +27,34 @@ export default function Header() {
 					<NavigationMenu viewport={isMobile}>
 						<NavigationMenuList className="flex-wrap">
 							<NavigationMenuItem>
-								<NavigationMenuTrigger className="bg-transparent">Lessons</NavigationMenuTrigger>
+								<NavigationMenuTrigger className="bg-transparent">Lekcje</NavigationMenuTrigger>
 								<NavigationMenuContent>
 									<div className="flex flex-row">
 										<NavigationMenuLink asChild>
 											<Link href="/lessons" className="w-64 p-8 flex flex-col justify-end">
-												<h2>Lessons</h2>
-												<span className="text-muted-foreground">Learn at your own pace and track your progress.</span>
+												<h2>Lekcje</h2>
+												<span className="text-muted-foreground">
+													Naucz się na własnym tempie i śledź swoje postępy.
+												</span>
 											</Link>
 										</NavigationMenuLink>
 										<div>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?l=beginner" className="p-3 w-48">
-													<span className="font-bold leading-none">Beginner</span>
-													<span className="text-muted-foreground leading-none">Start your journey</span>
+												<Link href="/lessons?l=Początkujący" className="p-3 w-64">
+													<span className="font-bold leading-none">Początkujący</span>
+													<span className="text-muted-foreground leading-none">Rozpocznij swoją podróż</span>
 												</Link>
 											</NavigationMenuLink>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?l=intermediate" className="p-3 w-48">
-													<span className="font-bold leading-none">Intermediate</span>
-													<span className="text-muted-foreground leading-none">Level up your skills</span>
+												<Link href="/lessons?l=Średniozaawansowany" className="p-3 w-64">
+													<span className="font-bold leading-none">Średniozaawansowany</span>
+													<span className="text-muted-foreground leading-none">Podnieś swoje umiejętności</span>
 												</Link>
 											</NavigationMenuLink>
 											<NavigationMenuLink asChild>
-												<Link href="/lessons?l=advanced" className="p-3 w-48">
-													<span className="font-bold leading-none">Advanced</span>
-													<span className="text-muted-foreground leading-none">Master the concepts</span>
+												<Link href="/lessons?l=Zaawansowany" className="p-3 w-64">
+													<span className="font-bold leading-none">Zaawansowany</span>
+													<span className="text-muted-foreground leading-none">Opanuj zaawansowane koncepcje</span>
 												</Link>
 											</NavigationMenuLink>
 										</div>

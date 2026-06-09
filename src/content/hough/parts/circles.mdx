@@ -1,0 +1,41 @@
+---
+title: "Hough dla Okręgów"
+order: 2
+icon: Circle
+---
+
+import { HoughTransform } from "@/modules/hough/HoughTransform";
+
+Wykrywanie okręgów jest trudniejsze niż linii, ponieważ okrąg opisują trzy parametry: współrzędne środka $(x_c, y_c)$ oraz promień $r$. To sprawia, że pełny akumulator musiałby być trójwymiarowy, co wymaga ogromnej ilości pamięci i czasu.
+
+### Model matematyczny
+
+Równanie okręgu to:
+$$ (x - x_c)^2 + (y - y_c)^2 = r^2 $$
+
+W praktyce często stosujemy uproszczenie: szukamy okręgów o **ustalonym promieniu $r$**. Wtedy każdy punkt krawędziowy $(x, y)$ "głosuje" na wszystkie punkty $(x_c, y_c)$, które mogą być środkiem okręgu przechodzącego przez ten punkt.
+
+Te punkty same tworzą okrąg o promieniu $r$ wokół punktu $(x, y)$:
+$$ x_c = x - r \cos \phi $$
+$$ y_c = y - r \sin \phi $$
+
+Gdy wiele pikseli krawędziowych pochodzi z tego samego okręgu, ich głosy skumulują się dokładnie w jednym punkcie — w środku tego okręgu.
+
+> [!NOTE]
+> W przeciwieństwie do Hougha liniowego, tutaj akumulator ma takie same wymiary jak obraz wejściowy. Każdy jasny punkt w akumulatorze to potencjalny środek okręgu.
+
+---
+
+### Eksperymentuj z okręgami
+
+Wybierz obraz z okręgami i spróbuj dopasować suwak **Promień**.
+- Jeśli promień suwaka zgadza się z promieniem na obrazie, w akumulatorze zobaczysz bardzo silne, punktowe światło.
+- Jeśli promień jest błędny, głosy rozproszą się, tworząc jedynie słabe obwódki.
+
+<HoughTransform type="circles" />
+
+> [!TIP]
+> Transformacja Hougha dla okręgów jest fundamentem systemów rozpoznawania monet, tęczówek oka czy źrenic w systemach typu eye-tracking.
+
+### Wyzwania
+Pełna detekcja (gdy nie znamy promienia) wymaga przeszukania wielu warstw akumulatora dla różnych wartości $r$. Jest to proces kosztowny, dlatego w profesjonalnych bibliotekach (jak OpenCV) stosuje się optymalizację polegającą na wykorzystaniu kierunku gradientu z algorytmu Sobela/Canny'ego, co drastycznie ogranicza liczbę głosów.

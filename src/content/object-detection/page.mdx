@@ -1,0 +1,60 @@
+---
+title: "Detekcja obiektów"
+order: 8
+icon: Boxes
+description: |
+  Detekcja obiektów to połączenie klasyfikacji i lokalizacji. Dowiesz się, jak algorytmy wyznaczają granice przedmiotów (Bounding Boxes), jak mierzyć ich dokładność (IoU) oraz jak usuwać powtarzające się predykcje (NMS).
+tags:
+  skill_level: "Zaawansowany"
+  topic:
+    - "Detekcja obiektów"
+    - "Bounding Boxes"
+    - "IoU"
+    - "NMS"
+    - "Computer Vision"
+coverImage: "/covers/cover.png"
+---
+
+### Co? Gdzie? Jak wiele?
+
+W poprzednich modułach uczyliśmy się, jak rozpoznać, co jest na zdjęciu (klasyfikacja). **Detekcja obiektów** (Object Detection) idzie o krok dalej. Odpowiada nie tylko na pytanie "co?", ale również "**gdzie?**" oraz "**ile?**" obiektów znajduje się w polu widzenia.
+
+Zadanie to polega na jednoczesnej:
+1.  **Lokalizacji**: Wyznaczeniu prostokąta otaczającego obiekt (Bounding Box).
+2.  **Klasyfikacji**: Przypisaniu etykiety (np. "pies", "samochód") do każdego prostokąta.
+
+> [!IMPORTANT]
+> Detekcja obiektów jest fundamentem systemów bezpieczeństwa, medycyny (lokalizacja zmian patologicznych) oraz pojazdów autonomicznych, które muszą precyzyjnie znać położenie przeszkód na drodze.
+
+---
+
+### Kluczowe pojęcia
+
+Zanim przejdziemy do żywego detektora, musimy zrozumieć mechanizmy, które dbają o jego precyzję:
+
+1.  **Bounding Box (BBox)**
+    Reprezentacja obiektu za pomocą czterech liczb: $(x, y, w, h)$ lub $(x_{min}, y_{min}, x_{max}, y_{max})$.
+    
+2.  **Intersection over Union (IoU)**
+    Miara określająca, jak dobrze nasz prostokąt pokrywa się z rzeczywistym obiektem.
+
+3.  **Non-Maximum Suppression (NMS)**
+    Algorytm "sprzątający", który spośród wielu nakładających się na siebie prostokątów wybiera ten jeden, najbardziej prawdopodobny.
+
+---
+
+### Czego się nauczysz?
+
+W tej lekcji przejdziesz przez pełny proces detekcji:
+
+1.  **Bounding Boxes i IoU**
+    Zrozumiesz geometrię detekcji i nauczysz się obliczać błąd pokrycia.
+    
+2.  **Non-Maximum Suppression (NMS)**
+    Zobaczysz interaktywną animację procesu "odchudzania" nadmiarowych predykcji.
+
+3.  **Lekki detektor (COCO-SSD)**
+    Uruchomisz w przeglądarce profesjonalny model zdolny do rozpoznawania 80 klas obiektów w czasie rzeczywistym.
+
+> [!TIP]
+> Zapraszamy do eksploracji. Detekcja to jeden z najbardziej dynamicznie rozwijających się działów Sztucznej Inteligencji!

@@ -1,11 +1,68 @@
 ---
-title: "Canny"
+title: "Algorytm Canny'ego"
 order: 2
-icon: AlignHorizontalJustifyCenter
+icon: Zap
 ---
 
 import { Canny, CannyProvider } from "@/modules/edge-detection/Canny";
 
+Algorytm Canny'ego jest uważany za optymalny detektor krawędzi. Został zaprojektowany tak, aby spełniać trzy główne kryteria:
+1.  **Dobra detekcja**: Minimalizacja błędnych wykryć i pominiętych krawędzi.
+2.  **Dobra lokalizacja**: Odległość między wykrytą krawędzią a rzeczywistą krawędzią powinna być minimalna.
+3.  **Minimalna odpowiedź**: Jedna krawędź powinna generować tylko jedną linię (brak krawędzi wielokrotnych).
+
+### Proces przetwarzania (Step-by-Step)
+
+Algorytm realizuje te cele poprzez następujący potok:
+
+#### 1. Redukcja szumu (Gaussian Blur)
+Krawędzie są bardzo wrażliwe na drobne zmiany jasności (szum). Pierwszym krokiem jest więc wygładzenie obrazu przy użyciu filtru Gaussa.
+$$ G(x, y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2 + y^2}{2\sigma^2}} $$
+
+#### 2. Obliczanie gradientów
+Wyznaczamy amplitudę $|G|$ i kierunek $\theta$ zmian jasności, zazwyczaj używając operatora Sobela.
+
+#### 3. Non-Maximum Suppression (NMS)
+To etap "ścieńczenia" krawędzi. Dla każdego piksela sprawdzamy, czy jego amplituda jest większa niż sąsiadów w kierunku gradientu. Kierunek $\theta$ jest kwantyzowany do czterech podstawowych orientacji:
+- Pionowa ($90^\circ$): porównujemy z sąsiadami góra/dół.
+- Pozioma ($0^\circ$): porównujemy z sąsiadami lewo/prawo.
+- Przekątne ($45^\circ$ i $135^\circ$): porównujemy z sąsiadami po skosie.
+
+#### 4. Podwójne progowanie (Double Thresholding)
+Wprowadzamy dwa progi: **T_high** i **T_low**.
+- Piksele powyżej **T_high** są oznaczane jako **mocne krawędzie**.
+- Piksele pomiędzy **T_low** a **T_high** są oznaczane jako **słabe krawędzie**.
+- Reszta jest odrzucana.
+
+#### 5. Śledzenie krawędzi (Hysteresis)
+Słaba krawędź zostaje zachowana tylko wtedy, gdy jest połączona (sąsiaduje) z mocną krawędzią. Dzięki temu odfiltrowujemy szum, który przekroczył progi, ale nie tworzy spójnej struktury z głównymi krawędziami obrazu.
+
+> [!IMPORTANT]
+> To właśnie **Histereza** i **NMS** sprawiają, że Canny produkuje tak czyste i precyzyjne wyniki w porównaniu do prostych metod gradientowych.
+
+### Demo interaktywne
+
+Eksperymentuj z parametrami algorytmu. Zwróć uwagę, jak `Sigma` wpływa na to, czy wykrywane są drobne detale, czy tylko główne kontury.
+
 <CannyProvider>
 	<Canny />
 </CannyProvider>
+
+> [!TIP]
+> Spróbuj ustawić wysoki `High Threshold` i niski `Low Threshold`. Zobaczysz wtedy, jak histereza "wyciąga" słabsze fragmenty krawędzi, o ile tylko mają one punkt styku z tymi najmocniejszymi.
+
+### Przykład logiki NMS
+
+Poniżej fragment pseudokodu ilustrujący jak kwantyzujemy kąt gradientu do kierunków sąsiedztwa:
+
+```ts
+// angle to stopnie w zakresie [0, 180]
+if ((angle >= 0 && angle < 22.5) || (angle >= 157.5 && angle <= 180)) {
+  // Kierunek poziomy
+  if (mag[x][y] < mag[x+1][y] || mag[x][y] < mag[x-1][y]) mag[x][y] = 0;
+} else if (angle >= 22.5 && angle < 67.5) {
+  // Kierunek 45 stopni
+  if (mag[x][y] < mag[x+1][y-1] || mag[x][y] < mag[x-1][y+1]) mag[x][y] = 0;
+} 
+// ... i tak dalej dla pozostałych kierunków
+```

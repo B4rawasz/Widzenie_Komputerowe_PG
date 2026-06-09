@@ -1,0 +1,37 @@
+---
+title: "Lekki detektor (COCO-SSD)"
+order: 3
+icon: Camera
+---
+
+import { ObjectDetection } from "@/modules/object-detection/ObjectDetection";
+
+Dzięki nowoczesnym optymalizacjom i bibliotece **TensorFlow.js**, możemy uruchamiać detekcję obiektów bezpośrednio w oknie przeglądarki, bez przesyłania obrazu na serwer.
+
+### Model COCO-SSD
+
+W tym module wykorzystujemy model **SSD** (Single Shot MultiBox Detector) z lekką siecią bazową **MobileNetV2**. Został on wytrenowany na zbiorze **COCO** (Common Objects in Context), co pozwala mu rozpoznawać 80 różnych klas przedmiotów codziennego użytku.
+
+Zalety tego podejścia:
+-   **Szybkość**: Przetwarza obraz w jednym przebiegu (stąd nazwa "Single Shot").
+-   **Prywatność**: Twoje wideo nigdy nie opuszcza komputera.
+-   **Mobilność**: Działa płynnie nawet na smartfonach.
+
+---
+
+### Test na żywo
+
+Uruchom kamerę i sprawdź, jak algorytm radzi sobie w Twoim otoczeniu.
+-   Model spróbuje nazwać obiekty i narysuje wokół nich BBoxy.
+-   Użyj suwaka **Score threshold**, aby ustalić, jak "pewne" muszą być detekcje, by pojawiły się na ekranie.
+
+<ObjectDetection type="live-detector" />
+
+> [!CAUTION]
+> Modele typu "Lite" są zoptymalizowane pod kątem szybkości, a nie precyzji. Mogą zdarzać się błędne predykcje, szczególnie przy słabym oświetleniu lub nietypowych kątach widzenia.
+
+### Co tu się dzieje pod maską?
+1.  Obraz z Twojej kamery jest skalowany i przekazywany do sieci neuronowej.
+2.  Sieć generuje tysiące potencjalnych BBoxów.
+3.  Biblioteka automatycznie stosuje **NMS**, aby wybrać najlepsze wyniki.
+4.  Końcowe współrzędne są rysowane na płótnie (Canvas) nad obrazem wideo.

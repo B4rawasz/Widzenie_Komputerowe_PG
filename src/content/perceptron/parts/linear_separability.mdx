@@ -1,11 +1,40 @@
 ---
 title: "Separowalność liniowa"
 order: 3
-icon: AlignHorizontalJustifyCenter
+icon: Spline
 ---
 
 import { Perceptron, PerceptronProvider } from "@/modules/perceptron/Perceptron";
 
+Dlaczego perceptron jest ograniczony? Odpowiedź leży w geometrii. Choć neuron wydaje się skomplikowanym mechanizmem, w przestrzeni dwuwymiarowej (z dwoma wejściami) działa on dokładnie tak jak **linia prosta**.
+
+### Granica decyzyjna
+
+Równanie $w_1 x_1 + w_2 x_2 + \text{bias} = 0$ to wzór prostej w układzie współrzędnych. Perceptron dzieli świat na dwie połowy:
+- Po jednej stronie prostej wynik to zawsze **1**.
+- Po drugiej stronie wynik to zawsze **0**.
+
+Mówimy, że zbiór danych jest **liniowo separowalny**, jeśli da się przeciągnąć jedną prostą tak, aby wszystkie punkty klasy A były po jednej stronie, a klasy B po drugiej.
+
+### Problem XOR
+
+Klasycznym przykładem porażki pojedynczego perceptronu jest funkcja logiczna XOR. Punkty tej funkcji są ułożone tak, że nie da się ich oddzielić pojedynczą prostą. Aby rozwiązać ten problem, potrzebujemy **wielu neuronów** połączonych w warstwy.
+
+> [!IMPORTANT]
+> Pojedynczy perceptron to tylko prosta linia. Sieć neuronowa to zestaw wielu linii, które razem mogą tworzyć dowolnie skomplikowane kształty granic.
+
+---
+
+### Eksperyment 2D
+
+Poniżej możesz sprawdzić granice możliwości perceptronu:
+1.  Wybierz klasę (0 lub 1) i klikaj na szarym polu, aby dodać punkty.
+2.  Naciśnij **Play**, aby rozpocząć uczenie.
+3.  Obserwuj, jak linia (granica decyzyjna) "tańczy", próbując pogodzić wszystkie punkty.
+
 <PerceptronProvider>
 	<Perceptron type={"full"}/>
 </PerceptronProvider>
+
+> [!TIP]
+> Spróbuj ułożyć punkty w kształt "szachownicy" (punkty klasy 0 w lewym górnym i prawym dolnym rogu, a klasy 1 w pozostałych). Zobaczysz, że linia nigdy nie przestanie się ruszać — perceptron nigdy nie osiągnie stanu bezbłędnego, bo problem nie jest liniowo separowalny!

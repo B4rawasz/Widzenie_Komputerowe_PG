@@ -1,0 +1,38 @@
+---
+title: "Pruning i konwersja do grafu"
+order: 2
+icon: GitBranch
+---
+
+import { Skeletonization } from "@/modules/skeletonization/Skeletonization";
+
+Sam szkielet w postaci rastrowej (pikseli) jest trudny do analizy. Aby komputer mógł go "zrozumieć", musimy zamienić go na strukturę danych — **graf**. Jednak zanim to zrobimy, musimy poradzić sobie z szumem.
+
+### Pruning (Przycinanie)
+
+Algorytmy szkieletyzacji są niezwykle czułe na nierówności na brzegach obiektu. Nawet mały piksel wystający z boku może spowodować powstanie długiej, niepotrzebnej gałęzi szkieletu (tzw. "włosy" lub "ogonki").
+
+**Pruning** to proces usuwania gałęzi, które kończą się "ślepo" i są krótsze niż zadany próg. Dzięki temu zostawiamy tylko istotny szkielet strukturalny.
+
+### Konwersja do grafu
+
+Proces zamiany pikseli na graf przebiega w kilku krokach:
+1.  **Wykrywanie punktów specjalnych**:
+    - **Endpoint** (Stopień 1): Piksel mający tylko jednego sąsiada.
+    - **Junction** (Stopień $\geq$ 3): Miejsce, gdzie linie się przecinają lub rozgałęziają.
+2.  **Śledzenie krawędzi**: Podążanie wzdłuż pikseli od jednego węzła do drugiego.
+3.  **Fuzja węzłów**: Jeśli kilka punktów rozgałęzienia leży bardzo blisko siebie, łączymy je w jeden węzeł dla uproszczenia topologii.
+
+> [!IMPORTANT]
+> Graf pozwala na obliczanie odległości między węzłami, znajdowanie najkrótszych ścieżek i porównywanie kształtów niezależnie od ich rotacji czy skali.
+
+---
+
+### Eksperymentuj z czyszczeniem
+
+Użyj suwaka **Pruning length**, aby zobaczyć, jak algorytm "odcina" mniejsze gałęzie. Suwak **Node merge radius** pozwoli Ci kontrolować, jak bliskie rozgałęzienia są traktowane jako jeden punkt.
+
+<Skeletonization type="graph" />
+
+> [!TIP]
+> Narysuj kształt z wieloma drobnymi wypustkami. Zwiększaj powoli `Pruning length`. Zobaczysz, jak nieistotne gałęzie znikają, a graf staje się bardziej przejrzysty i stabilny.

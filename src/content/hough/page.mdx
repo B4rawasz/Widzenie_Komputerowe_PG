@@ -1,47 +1,55 @@
 ---
-title: "Wykrywanie prymitywów"
+title: "Transformacja Hougha"
 order: 3
 icon: ScanSearch
 description: |
-  Transformacja Hougha to klasyczna technika wykrywania geometrycznych prymitywów — prostych i okręgów — w obrazach binarnych (krawędziowych).
-  Poznasz zasadę działania akumulatora, pojęcie przestrzeni parametrycznej i sposób znajdowania peaków.
+  Transformacja Hougha to potężna technika wykrywania kształtów geometrycznych (prymitywów), takich jak proste i okręgi. Pozwala na znalezienie obiektów nawet wtedy, gdy ich obrysy są nieciągłe lub częściowo zasłonięte.
 tags:
-  skill_level: "intermediate"
+  skill_level: "Średniozaawansowany"
   topic:
-    - "hough transform"
-    - "line detection"
-    - "circle detection"
-    - "edge detection"
-    - "accumulator"
+    - "Transformacja Hougha"
+    - "Wykrywanie linii"
+    - "Przestrzeń parametryczna"
+    - "Akumulator"
 coverImage: "/covers/cover.png"
 ---
 
-import { HoughTransform } from "@/modules/hough/HoughTransform";
+### Czym jest Transformacja Hougha?
 
-## Transformacja Hougha — proste
+Wyobraź sobie, że masz zbiór punktów krawędziowych na zdjęciu. Jak komputer może "domyślić się", że te punkty układają się w idealną prostą lub okrąg? Zwykłe metody analizy piksel po pikselu zawodzą, gdy linia jest przerwana lub zaszumiona.
 
-Transformacja Hougha przekształca każdy piksel krawędziowy z przestrzeni obrazu `(x, y)` do przestrzeni parametrycznej `(ρ, θ)`, zgodnie ze wzorem:
+**Transformacja Hougha** rozwiązuje ten problem poprzez mechanizm **głosowania**. Zamiast analizować obraz bezpośrednio, przenosimy każdy punkt do specjalnej **przestrzeni parametrycznej**.
 
-```
-ρ = x·cos(θ) + y·sin(θ)
-```
-
-Każdy punkt głosuje na wszystkie możliwe proste, które przez niego przechodzą. Kolumny akumulatora odpowiadają kątowi θ, wiersze — odległości ρ od środka układu. Jasne plamy (peaki) w akumulatorze oznaczają proste, na które głosowało najwięcej pikseli.
-
-**Załaduj własny obraz lub użyj przykładowego. Wczytaj krawędzie i obserwuj akumulator — najedź na peak, aby zobaczyć wykrytą prostą.**
-
-<HoughTransform type={"lines"} />
+> [!IMPORTANT]
+> Główna idea: Każdy punkt krawędziowy "głosuje" na wszystkie możliwe figury (proste, okręgi), do których mógłby należeć. Miejsce, gdzie głosy się kumulują, wskazuje na rzeczywisty kształt w obrazie.
 
 ---
 
-## Transformacja Hougha — okręgi
+### Przestrzeń parametryczna i Akumulator
 
-Dla okręgów o **ustalonym promieniu `r`** każdy piksel krawędziowy głosuje na wszystkie możliwe środki `(cx, cy)`:
+Kluczem do zrozumienia tej techniki są dwa pojęcia:
 
-```
-cx = x - r·cos(α),   cy = y - r·sin(α)
-```
+1.  **Przestrzeń parametrów**: Zamiast opisywać figurę punktami $(x, y)$, opisujemy ją parametrami. Dla prostej mogą to być $(\rho, \theta)$, a dla okręgu środek $(x_c, y_c)$ i promień $r$.
+2.  **Akumulator**: To dyskretna macierz (taka "tabela wyników"), w której zliczamy głosy. Każdy piksel krawędziowy zwiększa wartość w tych komórkach akumulatora, które odpowiadają parametrom przechodzącym przez ten piksel.
 
-Akumulator ma teraz wymiary przestrzeni obrazu — każdy jasny punkt to kandydat na środek okręgu. Zmień suwak promienia i obserwuj, jak peaki pojawiają się dokładnie w centrum kół.
+### Dlaczego to jest skuteczne?
 
-<HoughTransform type={"circles"} />
+Transformacja Hougha jest wyjątkowo odporna na:
+- **Szum**: Pojedyncze błędne punkty nie zbiorą wystarczającej liczby głosów, by stworzyć "peak".
+- **Nieciągłość**: Nawet jeśli linia jest przerywana, jej fragmenty będą głosować na te same parametry, tworząc silny sygnał w akumulatorze.
+- **Zasłonięcia**: Obiekt może być częściowo ukryty za innym przedmiotem, a algorytm i tak go wykryje.
+
+---
+
+### Czego się nauczysz?
+
+W tym module podzielimy naukę na dwa kluczowe przypadki:
+
+1.  **Hough Liniowy**
+    Dowiesz się, dlaczego nie używamy wzoru $y = ax + b$ i jak reprezentować proste za pomocą kąta i odległości.
+    
+2.  **Hough dla Okręgów**
+    Zobaczysz, jak wykrywać koła o ustalonym promieniu i dlaczego wymaga to większej mocy obliczeniowej.
+
+> [!TIP]
+> Transformacja Hougha to klasyka przetwarzania obrazów, która znajduje zastosowanie w systemach wspomagania kierowcy (wykrywanie linii pasów) oraz w robotyce przemysłowej.

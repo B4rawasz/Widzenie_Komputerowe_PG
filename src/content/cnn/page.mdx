@@ -1,0 +1,54 @@
+---
+title: "Konwolucyjne sieci neuronowe"
+order: 7
+icon: BrainCircuit
+description: |
+  Konwolucyjne sieci neuronowe (CNN) to potęga stojąca za nowoczesnym widzeniem komputerowym. Dowiesz się, jak operacja splotu pozwala maszynom "widzieć" lokalne wzorce i budować hierarchiczną wiedzę o świecie.
+tags:
+  skill_level: "Zaawansowany"
+  topic:
+    - "CNN"
+    - "Konwolucja"
+    - "Deep Learning"
+    - "Analiza obrazu"
+coverImage: "/covers/cover.png"
+---
+
+### Rewolucja w widzeniu
+
+Tradycyjne sieci MLP (Multilayer Perceptron), które poznałeś wcześniej, mają jedną dużą wadę: traktują każdy piksel obrazu jako niezależną cechę. Gdybyś przesunął twarz na zdjęciu o kilka pikseli, dla sieci MLP byłby to zupełnie nowy, nieznany wzorzec.
+
+**Konwolucyjne sieci neuronowe (CNN)** zmieniły wszystko. Zamiast patrzeć na obraz globalnie, używają **lokalnych pól recepcyjnych**. Przesuwają małe filtry nad obrazem, szukając konkretnych cech — krawędzi, kształtów, tekstur — niezależnie od tego, gdzie się znajdują.
+
+> [!IMPORTANT]
+> Architektura CNN jest inspirowana budową kory wzrokowej ssaków, gdzie poszczególne neurony reagują na bodźce tylko w ograniczonym obszarze pola widzenia.
+
+---
+
+### Co poznasz w tym module?
+
+Prześledzimy drogę od pojedynczego piksela do pełnego zrozumienia sceny:
+
+1.  **Filtry konwolucyjne**
+    Zrozumiesz matematyczną istotę splotu. Zobaczysz, jak proste macierze wag mogą stać się wykrywaczami krawędzi czy rozmycia.
+    
+2.  **Mapy cech (Feature Maps)**
+    Dowiesz się, co powstaje po przejściu obrazu przez zestaw filtrów i dlaczego warstwa konwolucyjna produkuje "wielowarstwowy obraz".
+
+3.  **Hierarchia cech**
+    Zobaczysz, jak sieć buduje piramidę wiedzy: od prostych kresek w pierwszych warstwach do złożonych obiektów w głębi sieci.
+
+4.  **CNN vs MLP**
+    Na żywym przykładzie sprawdzisz, dlaczego splot jest odporny na przesuwanie obiektów (translacje), a klasyczne sieci nie.
+
+5.  **Grad-CAM (Wizualizacja uwagi)**
+    Zajrzymy do "podświadomości" sieci. Dowiesz się, na które fragmenty obrazu sieć patrzyła, podejmując swoją decyzję.
+
+---
+
+### Matematyczne serce: Splot (Convolution)
+
+Podstawą jest operacja splotu dyskretnego. Dla obrazu $I$ i filtra (jądra) $K$:
+$$ (I * K)(x, y) = \sum_{i} \sum_{j} I(x+i, y+j) \cdot K(i, j) $$
+
+Zapraszamy do pierwszej części, gdzie zobaczysz ten wzór w akcji!

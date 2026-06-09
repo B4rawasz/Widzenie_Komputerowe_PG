@@ -1,52 +1,55 @@
 ---
-title: "Proste sieci neuronowe"
-order: 5
+title: "Sieci neuronowe"
+order: 6
 icon: Network
 description: |
-  Od perceptronu do wielowarstwowej sieci MLP. Poznasz topologię sieci, propagację w przód,
-  wizualizację wag i aktywacji, a także mechanizm softmax i wpływ temperatury na pewność decyzji.
+  Od pojedynczego perceptronu do wielowarstwowych struktur MLP. Poznasz architekturę sieci, sposoby wizualizacji ich "wiedzy" oraz mechanizmy podejmowania ostatecznych decyzji.
 tags:
-  skill_level: "intermediate"
+  skill_level: "Zaawansowany"
   topic:
-    - "neural networks"
-    - "MLP"
-    - "backpropagation"
-    - "softmax"
-    - "activation functions"
-    - "digit recognition"
+    - "Sieci neuronowe"
+    - "Deep Learning"
+    - "Klasyfikacja obrazu"
+    - "Softmax"
 coverImage: "/covers/cover.png"
 ---
 
-import { NeuralNetwork } from "@/modules/neural-networks/NeuralNetworks";
+### Poza pojedynczy neuron
 
-## Od perceptronu do MLP
+W poprzedniej lekcji poznałeś perceptron — prosty model, który potrafi dzielić świat linią prostą. Wiemy już jednak, że rzeczywistość rzadko jest liniowo separowalna. Rozwiązaniem tego problemu jest połączenie wielu neuronów w warstwy, tworząc **Wielowarstwowy Perceptron (MLP)**.
 
-Perceptron to sieć z jedną warstwą i jednym neuronem. MLP (Multilayer Perceptron) rozszerza tę ideę o dowolną liczbę warstw ukrytych i neuronów. Każda warstwa wykonuje przekształcenie liniowe, po którym stosowana jest nieliniowa funkcja aktywacji (tutaj ReLU).
+MLP to fundament współczesnego "Głębokiego Uczenia" (Deep Learning). Dzięki wielu warstwom, sieć potrafi tworzyć niezwykle skomplikowane granice decyzyjne, pozwalając na rozpoznawanie twarzy, głosu czy pisma ręcznego.
 
-Dodawaj i usuwaj warstwy oraz neurony — obserwuj jak zmienia się propagacja sygnału. Kliknij neuron, aby zobaczyć jego aktywację i wagi wejściowe.
-
-<NeuralNetwork type={"mlp-topology"} />
-
----
-
-## MLP do rozpoznawania cyfr
-
-Sieć 64 → 64 → 32 → 10 wytrenowana na zbiorze sklearn digits (8×8 px, cyfry 0–9). Narysuj cyfrę lewym przyciskiem myszy — prawym wymazujesz. Sieć na bieżąco aktualizuje predykcję i wyświetla aktywacje obu warstw ukrytych.
-
-<NeuralNetwork type={"digit-recognizer"} />
+> [!IMPORTANT]
+> Kluczem do potęgi sieci neuronowych jest ich zdolność do bycia **uniwersalnymi aproksymatorami**. Oznacza to, że odpowiednio duża sieć może przybliżyć dowolną, nawet najbardziej zawiłą funkcję matematyczną.
 
 ---
 
-## Wizualizacja wag i aktywacji
+### Co poznasz w tym module?
 
-Ta sama sieć co wyżej, ale z możliwością kliknięcia dowolnego neuronu. Dla neuronu w **warstwie ukrytej 1** zobaczysz mapę wag w przestrzeni 8×8 — czyli które piksele najbardziej go aktywują. Dla neuronu w **warstwach głębszych** zobaczysz wagi od neuronów poprzedniej warstwy.
+Przejdziemy przez drogę od teorii połączeń do praktycznego rozpoznawania obrazu:
 
-<NeuralNetwork type={"weight-viz"} />
+1.  **Od perceptronu do MLP**
+    Zrozumiesz architekturę warstwową: wejście, warstwy ukryte i wyjście. Nauczysz się konfigurować topologię sieci.
+    
+2.  **MLP do rozpoznawania cyfr**
+    Zobaczysz sieć w praktycznym zadaniu — klasyfikacji pisma ręcznego. Dowiesz się, jak obraz pikselowy staje się sygnałem dla neuronów.
+
+3.  **Wizualizacja wag i aktywacji**
+    Zajrzymy do "mózgu" sieci. Zobaczysz mapy wag (filtry), które pokazują, jakich cech szukają poszczególne neurony.
+
+4.  **Softmax i pewność decyzji**
+    Dowiesz się, jak sieć zamienia surowe sygnały na prawdopodobieństwo i jak kontrolować jej "pewność siebie" za pomocą temperatury.
 
 ---
 
-## Softmax i pewność decyzji
+### Matematyka warstw
 
-Ostatnia warstwa sieci produkuje **logity** — surowe wartości przed normalizacją. Funkcja softmax przekształca je w rozkład prawdopodobieństwa sumujący się do 1. **Temperatura** skaluje logity przed softmax: niska temperatura wyostrza rozkład (jeden wynik dominuje), wysoka go spłaszcza (sieć staje się „niepewna"). Widoczna jest też **entropia Shannona** rozkładu.
+Każda warstwa sieci wykonuje przekształcenie liniowe, po którym następuje nieliniowa **funkcja aktywacji** (np. ReLU):
 
-<NeuralNetwork type={"softmax-viz"} />
+$$ \mathbf{h} = \sigma(\mathbf{W}\mathbf{x} + \mathbf{b}) $$
+
+To właśnie ta nieliniowość ($\sigma$) pozwala sieciom "wyjść poza proste linie" i uczyć się złożonych wzorców.
+
+> [!TIP]
+> Zapraszamy do eksploracji kolejnych części. Każda z nich zawiera interaktywny model, który pozwoli Ci poczuć, jak dane przepływają przez sieć i jak zmieniają się w miarę pogłębiania architektury.

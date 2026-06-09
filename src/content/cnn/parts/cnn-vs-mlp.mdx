@@ -1,0 +1,36 @@
+---
+title: "CNN vs MLP"
+order: 4
+icon: ArrowLeftRight
+---
+
+import { CnnVsMlpDemo } from "@/modules/cnn/ConvolutionalNetworks";
+
+Klasyczne sieci MLP (Multilayer Perceptron) radzą sobie świetnie z danymi tabelarycznymi, ale w przypadku obrazów mają jedną, krytyczną wadę: są skrajnie wrażliwe na przesunięcia obiektów (ang. *translations*).
+
+### Problem "Globalnego Widzenia"
+
+W sieci MLP każdy piksel ma swoją dedykowaną wagę. Jeśli sieć nauczyła się rozpoznawać cyfrę "7", gdy jest ona idealnie na środku, to po przesunięciu jej o kilka pikseli w bok, cyfra trafi na zupełnie inne neurony wejściowe. Dla MLP to zupełnie nowa sytuacja — sieć nagle "ślepieje".
+
+### Przewaga "Lokalnego Widzenia" (CNN)
+
+Sieci CNN rozwiązują ten problem dzięki dwóm mechanizmom:
+1.  **Współdzielenie wag (Shared Weights)**: Ten sam filtr (np. wykrywacz poziomej kreski) jest przesuwany nad całym obrazem. Jeśli "7" ma poziomą kreskę, filtr ją znajdzie niezależnie od tego, czy jest na środku, czy w rogu.
+2.  **Pooling (Próbkowanie)**: Operacja ta (zazwyczaj *Max Pooling*) uśrednia wyniki w małych oknach, sprawiając, że sieć reaguje na obecność cechy, a nie na jej dokładną pozycję co do piksela.
+
+> [!IMPORTANT]
+> To zjawisko nazywamy **niezmiennością na translację** (ang. *translation invariance*). Jest to powód, dla którego CNN zrewolucjonizowały świat Computer Vision.
+
+---
+
+### Test niezmienności
+
+Sprawdź na żywo różnicę między oboma modelami:
+- Przesuwaj cyfrę "7" za pomocą suwaka.
+- Obserwuj paski **Pewności predykcji**.
+- Zobacz, jak szybko MLP traci pewność (czerwony pasek), podczas gdy CNN (zielony pasek) pozostaje niemal niewzruszony.
+
+<CnnVsMlpDemo />
+
+> [!TIP]
+> Zauważ, że nawet przy ekstremalnym przesunięciu, gdzie część cyfry znika z pola widzenia, CNN wciąż podaje poprawny wynik. MLP w tej samej sytuacji podaje całkowicie przypadkowe odpowiedzi.

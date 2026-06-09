@@ -1,0 +1,42 @@
+---
+title: "Algorytmy szkieletyzacji"
+order: 1
+icon: Workflow
+---
+
+import { Skeletonization } from "@/modules/skeletonization/Skeletonization";
+
+Istnieje wiele dróg do uzyskania szkieletu, ale większość z nich można zaklasyfikować do jednej z dwóch kategorii: **ścienianie iteracyjne** lub **transformata odległościowa**.
+
+### 1. Ścienianie (Thinning) — Metoda Zhang-Suena
+
+Najpopularniejszym podejściem jest iteracyjne usuwanie pikseli z brzegów obiektu, aż zostanie tylko linia o grubości jednego piksela. Działa to jak "obieranie cebuli".
+
+Algorytm **Zhang-Suena** sprawdza sąsiedztwo $3 \times 3$ każdego piksela i usuwa go, jeśli spełnione są warunki dotyczące:
+- **Łączności**: Usunięcie piksela nie może rozłączyć obiektu.
+- **Liczby sąsiadów**: Piksel nie może być końcówką linii ani punktem centralnym.
+
+W każdej iteracji sprawdzane są warunki takie jak:
+$$ 2 \leq B(P_1) \leq 6 $$
+$$ A(P_1) = 1 $$
+gdzie $B(P_1)$ to liczba sąsiadów będących jedynkami, a $A(P_1)$ to liczba przejść $0 \to 1$ w cyklu dookoła piksela.
+
+### 2. Transformata odległościowa (Distance Transform)
+
+To podejście polega na obliczeniu dla każdego piksela obiektu jego odległości od najbliższego tła. Powstaje wtedy "mapa wysokości".
+
+Szkielet tworzą piksele, które są **lokalnymi maksimami** (grzbietami) na tej mapie. Jest to metoda szybsza, ale często wymagająca dodatkowego wygładzania, aby uzyskać ciągły szkielet.
+
+> [!NOTE]
+> Transformata odległościowa jest świetna do znajdowania "centrum masy" obiektu, podczas gdy Thinning lepiej zachowuje precyzyjną strukturę połączeń.
+
+---
+
+### Interaktywna wizualizacja
+
+Narysuj dowolny kształt na poniższym panelu, wybierz algorytm i naciśnij **Play**, aby zobaczyć proces szkieletyzacji krok po kroku.
+
+<Skeletonization type="basic" />
+
+> [!TIP]
+> Spróbuj narysować grubą literę "H". Zauważ, jak `Thinning` powoli zjada brzegi, a `Distance Transform` od razu koloruje wnętrze (im jaśniej, tym dalej od brzegu) i wyznacza środek.

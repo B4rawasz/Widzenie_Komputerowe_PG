@@ -3,61 +3,50 @@ title: "Klasyfikatory"
 order: 4
 icon: LayoutGrid
 description: |
-  Klasyfikator to model przypisujący obserwacje do klas. Poznasz cztery rodzaje klasyfikatorów:
-  statystyczny (Bayesa), minimalnoodległościowy, liniowy oraz odcinkowo-liniowy — i zobaczysz,
-  jak kształt granicy decyzyjnej wpływa na jakość klasyfikacji.
+  Klasyfikacja to proces przypisywania obiektów do predefiniowanych kategorii. Poznasz cztery fundamentalne podejścia: od metod statystycznych, przez minimalnoodległościowe, aż po zaawansowane granice liniowe i łamane.
 tags:
-  skill_level: "intermediate"
+  skill_level: "Średniozaawansowany"
   topic:
-    - "classification"
-    - "decision boundary"
-    - "bayes classifier"
-    - "nearest centroid"
-    - "linear classifier"
-    - "piecewise linear"
+    - "Klasyfikacja"
+    - "Granice decyzyjne"
+    - "Rozpoznawanie wzorców"
+    - "Uczenie maszynowe"
 coverImage: "/covers/cover.png"
 ---
 
-import { Classifier } from "@/modules/classifiers/Classifiers";
+### Czym jest klasyfikacja?
 
-## Klasyfikator statystyczny
+W dziedzinie widzenia komputerowego i rozpoznawania wzorców, **klasyfikacja** polega na podjęciu decyzji: do której z $N$ znanych grup (klas) należy dany obiekt? Może to być decyzja o tym, czy dany kształt jest literą "A" czy "B", lub czy wykryty na zdjęciu obiekt to samochód czy pieszy.
 
-Klasyfikator statystyczny (naiwny Bayes) opisuje każdą klasę rozkładem normalnym. Dla nowego punktu wybiera klasę o najwyższej gęstości prawdopodobieństwa `p(x | klasa)`. Na wykresie widoczne są **elipsy izoprawdopodobieństwa** (2σ) dla każdej klasy.
+Podstawą każdego klasyfikatora jest **przestrzeń cech**. Obiekty nie są analizowane jako surowe obrazy, lecz jako zestaw liczb (cech), takich jak pole powierzchni, obwód, czy liczba pętli (które poznałeś w module o szkieletyzacji).
 
-Przeciągnij próbkę testową (białe kółko) po przestrzeni — zobaczysz, jak zmienia przypisaną klasę w miarę zbliżania się do kolejnych elips.
-
-<Classifier type={"statistical"} />
-
----
-
-## Klasyfikator minimalnoodległościowy
-
-Klasyfikator minimalnoodległościowy (najbliższy centroid) przypisuje punkt do klasy, której **centroid** (środek ciężkości) jest najbliżej. Granice decyzyjne to **diagramy Woronoja** — prostopadłe dwusieczne odcinków łączących centroidy.
-
-Przeciągnij białe kółko — przerywana linia pokazuje odległość do najbliższego centroidu (◆).
-
-<Classifier type={"nearest-centroid"} />
+> [!IMPORTANT]
+> Zadaniem klasyfikatora jest wyznaczenie **granic decyzyjnych** w przestrzeni cech, które najlepiej oddzielają od siebie różne klasy obiektów.
 
 ---
 
-## Klasyfikator liniowy
+### Co poznasz w tym module?
 
-Klasyfikator liniowy dzieli przestrzeń cech **jedną prostą** (hiperpłaszczyzną). Wyraża się wzorem:
+Przejdziemy przez ewolucję metod klasyfikacji, analizując ich matematyczne podstawy i zachowanie na żywych danych:
 
-```
-w₁x + w₂y + b = 0
-```
+1.  **Klasyfikator statystyczny (Bayesa)**
+    Podejście probabilistyczne, w którym modelujemy rozkład punktów w każdej klasie za pomocą statystyki.
+    
+2.  **Klasyfikator minimalnoodległościowy**
+    Prosta i intuicyjna metoda oparta na odległości euklidesowej od środków ciężkości (centroidów) klas.
 
-gdzie `w₁`, `w₂` to wagi, a `b` to bias. Podejście to jest podstawą perceptronu i regresji logistycznej. Ustaw granicę decyzyjną suwakami i obserwuj liczbę błędnie sklasyfikowanych punktów.
+3.  **Klasyfikatory liniowe**
+    Fundament nowoczesnych sieci neuronowych. Dowiesz się, jak jedna prosta może stać się narzędziem decyzyjnym.
 
-<Classifier type={"linear"} />
+4.  **Klasyfikatory odcinkowo-liniowe**
+    Bardziej elastyczne podejście, pozwalające na tworzenie złożonych kształtów granic tam, gdzie jedna prosta to za mało.
 
 ---
 
-## Klasyfikator odcinkowo-liniowy
+### Matematyczne spojrzenie
 
-Gdy zbiór danych nie jest liniowo separowalny, granicę decyzyjną można złożyć z **wielu segmentów prostych**. Każdy segment to osobna lokalna granica. Razem tworzą poligon dzielący przestrzeń na obszary klas.
+Większość klasyfikatorów można opisać za pomocą funkcji dyskryminacyjnej $g(x)$. Dla dwóch klas podejmujemy decyzję:
+$$ \text{Jeśli } g(x) > 0 \implies \text{Klasa A} $$
+$$ \text{Jeśli } g(x) < 0 \implies \text{Klasa B} $$
 
-Przeciągaj białe uchwyty na wierzchołkach granicy, dodawaj lub usuwaj segmenty i staraj się zminimalizować liczbę błędów.
-
-<Classifier type={"piecewise"} />
+Zapraszamy do eksploracji kolejnych części, gdzie zobaczysz jak różne formy funkcji $g(x)$ wpływają na skuteczność rozpoznawania!

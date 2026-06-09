@@ -1,24 +1,55 @@
 ---
 title: "Perceptron"
-order: 6
-icon: GitFork
+order: 5
+icon: BrainCircuit
 description: |
-  Perceptron to podstawowy model sztucznego neuronu, który jest używany w uczeniu maszynowym do klasyfikacji danych.
-  Poznasz jego działanie, regułę uczenia oraz ograniczenia, takie jak separowalność liniowa.
+  Perceptron to najprostszy model sztucznego neuronu, stanowiący fundament współczesnych sieci neuronowych. Dowiesz się, jak pojedyncza komórka obliczeniowa może "uczyć się" klasyfikować dane.
 tags:
-  skill_level: "intermediate"
+  skill_level: "Średniozaawansowany"
   topic:
-    - "perceptron"
-    - "neural networks"
-    - "machine learning"
-    - "classification"
-    - "linear separability"
+    - "Perceptron"
+    - "Sieci neuronowe"
+    - "Uczenie nadzorowane"
+    - "Sztuczna inteligencja"
 coverImage: "/covers/cover.png"
 ---
 
-import { Perceptron, PerceptronProvider } from "@/modules/perceptron/Perceptron";
+### Biologiczna inspiracja
 
-<PerceptronProvider>
-	<Perceptron type={"full"}/>
-</PerceptronProvider>
+Sztuczny neuron, czyli **Perceptron**, został zaprojektowany jako uproszczony model matematyczny komórki nerwowej w ludzkim mózgu. Podobnie jak biologiczny neuron odbiera sygnały elektryczne przez dendryty, perceptron przyjmuje liczbowe sygnały wejściowe, mnoży je przez "siłę" połączeń (wagi) i podejmuje decyzję o wysłaniu sygnału dalej.
 
+Zaproponowany w 1958 roku przez Franka Rosenblatta, perceptron był pierwszym modelem zdolnym do samodzielnego uczenia się na podstawie błędów, co zapoczątkowało erę sztucznej inteligencji.
+
+> [!IMPORTANT]
+> Perceptron jest potężnym narzędziem, ale ma jedno kluczowe ograniczenie: potrafi rozróżniać tylko grupy danych, które można oddzielić linią prostą.
+
+---
+
+### Matematyczny fundament
+
+Działanie perceptronu można zamknąć w jednym prostym wzorze:
+$$ y = f\left( \sum_{i=1}^n w_i x_i + b \right) $$
+
+Gdzie:
+- $x_i$: Sygnały wejściowe (cechy obiektu).
+- $w_i$: **Wagi** (znaczenie poszczególnych cech).
+- $b$: **Obciążenie** (bias) — ułatwia przesunięcie granicy decyzji.
+- $f$: **Funkcja aktywacji** — w klasycznym perceptronie jest to funkcja skokowa (zwraca 0 lub 1).
+
+---
+
+### Czego się nauczysz?
+
+W tej lekcji prześledzimy drogę od pojedynczej komórki do działającego klasyfikatora:
+
+1.  **Czym jest perceptron?**
+    Zrozumiesz rolę wag i sumowania sygnałów. Zobaczysz, jak zmiana jednego suwaka wpływa na wynik końcowy.
+    
+2.  **Reguła korekty (Learning Rule)**
+    Odkryjesz "magię" uczenia się. Dowiesz się, jak algorytm sam poprawia swoje wagi, gdy popełni błąd.
+
+3.  **Separowalność liniowa**
+    Przeniesiemy perceptron do przestrzeni 2D. Zobaczysz go jako linię dzielącą świat na dwie części i poznasz przypadki, w których ten model kapituluje.
+
+> [!TIP]
+> Zrozumienie perceptronu to 90% sukcesu w nauce o głębokich sieciach neuronowych (Deep Learning). Współczesne potęgi AI to po prostu miliardy takich perceptronów połączonych ze sobą.

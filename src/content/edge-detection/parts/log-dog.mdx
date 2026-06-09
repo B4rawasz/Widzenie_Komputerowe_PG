@@ -1,7 +1,7 @@
 ---
-title: "LoG / DoG"
+title: "LoG i DoG (Druga pochodna)"
 order: 3
-icon: AlignHorizontalJustifyCenter
+icon: Target
 ---
 
 import {
@@ -17,28 +17,100 @@ import {
     LoGOutputs,
 } from "@/modules/edge-detection/LoGDoG";
 
-LoG (Laplacian of Gaussian) stosuje najpierw rozmycie Gaussa, a następnie operator Laplace'a, co wydobywa miejsca, gdzie druga pochodna obrazu przechodzi przez zero — często odpowiada to krawędziom.
+Podczas gdy operator Sobela szuka ekstremów pierwszej pochodnej, metody oparte na Laplasjanie koncentrują się na **drugiej pochodnej**. Krawędź w takim ujęciu to miejsce, gdzie druga pochodna przechodzi przez zero (**Zero-Crossing**).
 
-DoG (Difference of Gaussians) przybliża LoG przez odjęcie dwóch rozmyć Gaussa o różnych sigma — jest prostszy obliczeniowo i często używany jako detektor krawędzi/cech.
+### Laplacian of Gaussian (LoG)
+
+Operator Laplace'a $\nabla^2$ mierzy "zakrzywienie" jasności obrazu. Jest on jednak ekstremalnie wrażliwy na szum — każda drobna zmiana piksela jest potęgowana przez drugą pochodną. Rozwiązaniem jest uprzednie rozmycie obrazu filtrem Gaussa.
+
+#### Matematyka LoG
+Zamiast dwóch osobnych operacji, możemy użyć jednego splotu z jądrem LoG, znanym jako **Mexican Hat Kernel**:
+$$ LoG(x, y) = -\frac{1}{\pi\sigma^4} \left[ 1 - \frac{x^2 + y^2}{2\sigma^2} \right] e^{-\frac{x^2 + y^2}{2\sigma^2}} $$
+
+W wersji dyskretnej Laplasjan jest często przybliżany maską:
+$$ L = \begin{bmatrix} 0 & 1 & 0 \\ 1 & -4 & 1 \\ 0 & 1 & 0 \end{bmatrix} \text{ lub } \begin{bmatrix} 1 & 1 & 1 \\ 1 & -8 & 1 \\ 1 & 1 & 1 \end{bmatrix} $$
 
 <LoGDoGProvider>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center my-6">
         <LoGSource />
-        <div className="grid gap-4">
-            <LoGParams />
-            <DoGParams />
+        <LoGParams />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+        <div>
+            #### 1. Gaussian Blur (LoG)
+            Najpierw wygładzamy obraz, aby usunąć szum. Parametr $\sigma$ (Sigma) określa skalę detali, które przetrwają.
+            <LoGBlurPreview />
+        </div>
+        <div>
+            #### 2. Laplacian Output
+            Wynik splotu z Laplasjanem. Szukamy tutaj przejść przez zero (miejsca, gdzie jasny kolor styka się z ciemnym).
+            <LoGLaplacianPreview />
         </div>
     </div>
 
-    <div className="my-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <LoGBlurPreview />
-        <LoGLaplacianPreview />
-        <DoGBlurAPreview />
-        <DoGBlurBPreview />
-        <DoGDiffPreview />
+    ---
+
+    ### Difference of Gaussians (DoG)
+
+    Obliczanie pełnego LoG dla różnych skal jest kosztowne obliczeniowo. **DoG** to sprytna i bardzo szybka aproksymacja. Polega na odjęciu od siebie dwóch obrazów rozmytych filtrem Gaussa o różnych wartościach $\sigma$.
+
+    $$ DoG \approx (I * G_{\sigma_{large}}) - (I * G_{\sigma_{small}}) $$
+
+    W ten sposób uzyskujemy filtr pasmowoprzepustowy (band-pass), który uwypukla krawędzie i obiekty o specyficznej wielkości.
+
+    <div className="my-6">
+        <DoGParams />
     </div>
 
-    <div className="my-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+        <div>
+            #### Blur A ($\sigma_1$)
+            <DoGBlurAPreview />
+        </div>
+        <div>
+            #### Blur B ($\sigma_2$)
+            <DoGBlurBPreview />
+        </div>
+        <div>
+            #### Difference (A - B)
+            <DoGDiffPreview />
+        </div>
+    </div>
+
+    > [!TIP]
+    > DoG jest fundamentem algorytmu **SIFT**, służącego do znajdowania punktów charakterystycznych. Szukanie ekstremów w DoG pozwala znaleźć obiekty odporne na skalowanie.
+
+    ---
+
+    <div className="my-8">
+        ### Wynik końcowy (Thresholding)
+        Ostatnim etapem jest progowanie, aby uzyskać czystą krawędź. Poniżej możesz dostosować parametry obu metod, obserwując jak bezpośrednio wpływają one na końcową detekcję.
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
+            <LoGParams />
+            <DoGParams />
+        </div>
+        
         <LoGOutputs />
     </div>
 </LoGDoGProvider>
+
+### Podsumowanie metod drugiej pochodnej
+
+| Cecha | LoG | DoG |
+| :--- | :--- | :--- |
+| **Metoda** | Druga pochodna Gaussa | Różnica dwóch rozmyć |
+| **Złożoność** | Wyższa | Bardzo niska (tylko rozmycia) |
+| **Zastosowanie** | Precyzyjna lokalizacja krawędzi | Detekcja "plam" (Blob detection), SIFT |
+| **Kształt jądra** | Idealny "meksykański kapelusz" | Przybliżenie "meksykańskiego kapelusza" |
+
+```ts showLineNumbers
+// Przykład prostej implementacji DoG w kodzie
+function computeDoG(image, s1, s2) {
+  const blur1 = gaussianBlur(image, s1);
+  const blur2 = gaussianBlur(image, s2);
+  
+  return blur1.map((pixel, i) => pixel - blur2[i]);
+}
+```
