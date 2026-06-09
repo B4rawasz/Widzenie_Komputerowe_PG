@@ -96,11 +96,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 						</div>
 						<h3>{lesson.title}</h3>
 						<div className="text-sm grow">{lesson.description}</div>
-						<div className="flex justify-between w-full text-sm text-muted-foreground">
-							<span>Progres</span>
-							<span>67%</span>
-						</div>
-						<Progress value={67} />
+						<LessonProgress lessonData={lessons.find(l => l.lesson.slug === lesson.slug)} />
 						<Button asChild className="w-full mt-4 mb-6">
 							<Link href={`/lessons/${lesson.slug}`}>Rozpocznij lekcję</Link>
 						</Button>
@@ -109,6 +105,28 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 			))}
 		</AnimatePresence>
 	);
+
+	function LessonProgress({ lessonData }: { lessonData: any }) {
+		const [progress, setProgress] = useState(0);
+
+		useEffect(() => {
+			if (!lessonData) return;
+			const visited = JSON.parse(localStorage.getItem(`progress-${lessonData.lesson.slug}`) || "[]");
+			const total = 1 + (lessonData.parts ? lessonData.parts.length : 0);
+			const count = new Set(visited).size;
+			setProgress(Math.round((count / total) * 100));
+		}, [lessonData]);
+
+		return (
+			<>
+				<div className="flex justify-between w-full text-sm text-muted-foreground">
+					<span>Progres</span>
+					<span>{progress}%</span>
+				</div>
+				<Progress value={progress} />
+			</>
+		);
+	}
 
 	function drawTags(tags: string[]) {
 		return (
