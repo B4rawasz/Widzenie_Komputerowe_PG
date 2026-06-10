@@ -12,20 +12,20 @@ Większość modeli detekcji (jak YOLO czy SSD) zwraca setki "propozycji" dla je
 
 NMS działa w sposób zachłanny (greedy):
 
-1.  **Sortowanie**: Uporządkuj wszystkie BBoxy według ich pewności (*confidence score*) — od najwyższego do najniższego.
+1.  **Sortowanie**: Uporządkuj wszystkie BBoxy według ich pewności (*confidence score*) od najwyższego do najniższego.
 2.  **Wybór lidera**: Wybierz prostokąt z najwyższym wynikiem i uznaj go za "pewny".
-3.  **Usuwanie duplikatów**: Oblicz IoU między liderem a wszystkimi pozostałymi prostokątami tej samej klasy. Jeśli IoU jest wyższe niż zadany próg (np. 0.45), usuń gorszy prostokąt — uznajemy, że dotyczy on tego samego obiektu.
+3.  **Usuwanie duplikatów**: Oblicz IoU między liderem a wszystkimi pozostałymi prostokątami tej samej klasy. Jeśli IoU jest wyższe niż zadany próg (np. 0.45), usuń gorszy prostokąt. Uznajemy, że dotyczy on tego samego obiektu.
 4.  **Powtarzanie**: Powtarzaj kroki dla reszty prostokątów, aż lista będzie pusta.
 
 > [!IMPORTANT]
-> NMS nie "poprawia" współrzędnych — on po prostu wybiera najlepszego kandydata i wyrzuca tych, którzy mu zbyt mocno przeszkadzają.
+> NMS nie "poprawia" współrzędnych, on po prostu wybiera najlepszego kandydata i wyrzuca tych, którzy mu zbyt mocno przeszkadzają.
 
 ---
 
 ### Animacja NMS
 
 Uruchom poniższą symulację, aby zobaczyć, jak algorytm "czyści" obraz. 
-- Możesz sterować **IoU threshold** — im jest niższy, tym agresywniej algorytm usuwa blisko położone prostokąty.
+- Możesz sterować **IoU threshold** - im jest niższy, tym agresywniej algorytm usuwa blisko położone prostokąty.
 - Naciśnij **Odtwórz** lub klikaj **Krok →**, aby przeanalizować każdą decyzję modelu.
 
 <ObjectDetection type="nms" />
