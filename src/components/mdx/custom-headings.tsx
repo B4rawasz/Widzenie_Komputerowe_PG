@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { ElementType, useState } from "react";
 import { Check, Link } from "lucide-react";
 
 interface HeadingProps {
@@ -11,7 +11,7 @@ interface HeadingProps {
 
 export function Heading({ level, children, id }: HeadingProps) {
 	const [copied, setCopied] = useState(false);
-	const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+	const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 	const headingId = id || generateId(children);
 
@@ -28,17 +28,19 @@ export function Heading({ level, children, id }: HeadingProps) {
 			className="group relative scroll-mt-20 transition-colors cursor-pointer flex items-baseline my-6"
 			onClick={handleClick}
 		>
-			{children}
-			<button
-				className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-				aria-label="Copy link to heading"
-			>
-				{copied ? (
-					<Check className="w-[0.75em] h-[0.75em] text-green-500" />
-				) : (
-					<Link className="w-[0.75em] h-[0.75em]" />
-				)}
-			</button>
+			<>
+				{children}
+				<button
+					className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+					aria-label="Copy link to heading"
+				>
+					{copied ? (
+						<Check className="w-[0.75em] h-[0.75em] text-green-500" />
+					) : (
+						<Link className="w-[0.75em] h-[0.75em]" />
+					)}
+				</button>
+			</>
 		</Tag>
 	);
 }

@@ -21,7 +21,7 @@ function convolve3x3(
 	src: Uint8ClampedArray,
 	w: number,
 	h: number,
-	kernel: number[],
+	kernel: readonly number[],
 	gain: number = 1.0,
 ): Uint8ClampedArray {
 	const out = new Uint8ClampedArray(src.length);
@@ -140,7 +140,9 @@ export function ConvolutionFiltersDemo() {
 		tmp.width = W;
 		tmp.height = H;
 		const tCtx = tmp.getContext("2d")!;
-		tCtx.putImageData(new ImageData(filtered, W, H), 0, 0);
+		const imgData = tCtx.createImageData(W, H);
+		imgData.data.set(filtered);
+		tCtx.putImageData(imgData, 0, 0);
 		// Tint orange-red
 		tCtx.globalCompositeOperation = "multiply";
 		tCtx.fillStyle = "#ff5500";
@@ -240,13 +242,15 @@ const FEATURE_KERNELS: { name: string; kernel: number[]; tint: string }[] = [
 function renderTinted(
 	canvas: HTMLCanvasElement,
 	srcData: Uint8ClampedArray,
-	kernel: number[],
+	kernel: readonly number[],
 	tint: string,
 	gain: number = 1.0,
 ) {
 	const ctx = canvas.getContext("2d")!;
 	const filtered = convolve3x3(srcData, W, H, kernel, gain);
-	ctx.putImageData(new ImageData(filtered, W, H), 0, 0);
+	const imgData = ctx.createImageData(W, H);
+	imgData.data.set(filtered);
+	ctx.putImageData(imgData, 0, 0);
 	ctx.globalCompositeOperation = "multiply";
 	ctx.globalAlpha = 0.55;
 	ctx.fillStyle = tint;
