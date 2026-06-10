@@ -13,7 +13,7 @@ Wielowarstwowy Perceptron (ang. *Multilayer Perceptron*, MLP) to rozwinięcie id
 W typowej sieci MLP wyróżniamy trzy rodzaje warstw:
 
 1.  **Warstwa wejściowa (Input Layer)**: Odbiera surowe dane (np. piksele obrazu). Liczba neuronów odpowiada liczbie cech wejściowych.
-2.  **Warstwy ukryte (Hidden Layers)**: Tu dzieje się "magia". Neurony w tych warstwach uczą się rozpoznawać coraz bardziej złożone abstrakcje — od krawędzi, przez kształty, aż po konkretne obiekty.
+2.  **Warstwy ukryte (Hidden Layers)**: Tu dzieje się "magia". Neurony w tych warstwach uczą się rozpoznawać coraz bardziej złożone abstrakcje od krawędzi, przez kształty, aż po konkretne obiekty.
 3.  **Warstwa wyjściowa (Output Layer)**: Podaje końcowy wynik (np. prawdopodobieństwo, że obraz przedstawia cyfrę '5').
 
 ### Przepływ sygnału (Forward Pass)
@@ -21,7 +21,7 @@ W typowej sieci MLP wyróżniamy trzy rodzaje warstw:
 Dane płyną przez sieć w jednym kierunku. Każdy neuron w warstwie $N$ jest połączony z **każdym** neuronem w warstwie $N+1$. To połączenie ("każdy z każdym") nazywamy warstwą **w pełni połączoną** (ang. *Fully Connected* lub *Dense*).
 
 > [!IMPORTANT]
-> To właśnie liczba i rozmiar warstw ukrytych decydują o "pojemności intelektualnej" sieci. Zbyt mała sieć nie nauczy się zadania, zbyt duża — zapamięta dane na pamięć (overfitting).
+> To właśnie liczba i rozmiar warstw ukrytych decydują o "pojemności intelektualnej" sieci. Zbyt mała sieć nie nauczy się zadania, zbyt duża zapamięta dane na pamięć (overfitting).
 
 ---
 
