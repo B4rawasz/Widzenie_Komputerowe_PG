@@ -10,7 +10,7 @@ Klasyfikator minimalnoodległościowy (ang. *nearest centroid classifier*) to je
 
 ### Centroidy i Odległość Euklidesowa
 
-Dla każdej klasy obliczamy jej **centroid** (środek ciężkości) — punkt, którego współrzędne są średnimi arytmetycznymi współrzędnych wszystkich punktów należących do danej klasy.
+Dla każdej klasy obliczamy jej **centroid** (środek ciężkości) punkt, którego współrzędne są średnimi arytmetycznymi współrzędnych wszystkich punktów należących do danej klasy.
 
 Dla nowej próbki $x$, obliczamy odległość euklidesową do wszystkich centroidów $c_i$:
 $$ d(x, c_i) = \sqrt{\sum (x_j - c_{ij})^2} $$
@@ -27,7 +27,7 @@ Granice decyzyjne w tej metodzie to prostopadłe dwusieczne odcinków łączący
 
 ### Eksploracja przestrzeni Woronoja
 
-Włącz opcję **Obszary decyzyjne**, aby zobaczyć, jak przestrzeń zostaje podzielona na wielokąty. Przeciągaj białe kółko i obserwuj linię przerywaną — pokazuje ona aktualną odległość do zwycięskiego centroidu (oznaczonego symbolem ◆).
+Włącz opcję **Obszary decyzyjne**, aby zobaczyć, jak przestrzeń zostaje podzielona na wielokąty. Przeciągaj białe kółko i obserwuj linię przerywaną, pokazuje ona aktualną odległość do zwycięskiego centroidu (oznaczonego symbolem ◆).
 
 <Classifier type="nearest-centroid" />
 
