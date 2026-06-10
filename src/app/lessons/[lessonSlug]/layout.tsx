@@ -8,7 +8,7 @@ export default async function LessonLayout({
 	params,
 }: {
 	children: React.ReactNode;
-	params: { lessonSlug: string };
+	params: Promise<{ lessonSlug: string }>;
 }) {
 	const { lessonSlug } = await params;
 
