@@ -12,7 +12,7 @@ Ostatnia warstwa sieci produkuje surowe wartości liczbowe, zwane **logitami**. 
 
 Softmax normalizuje logity ($z_i$) tak, aby wszystkie wyniki sumowały się do 1 (100%):
 $$ \sigma(\mathbf{z})_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}} $$
-Gdzie $T$ to **Temperatura** — parametr kontrolujący "ostrość" rozkładu.
+Gdzie $T$ to **Temperatura**, parametr kontrolujący "ostrość" rozkładu.
 
 ### Rola temperatury
 

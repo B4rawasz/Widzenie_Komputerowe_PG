@@ -22,8 +22,13 @@ function convolve3x3(
 	w: number,
 	h: number,
 	kernel: number[],
+	gain: number = 1.0,
 ): Uint8ClampedArray {
 	const out = new Uint8ClampedArray(src.length);
+	const kSum = kernel.reduce((a, b) => a + b, 0);
+	const divisor = Math.abs(kSum) || 1;
+	const offset = kSum === 0 ? 128 : 0;
+
 	for (let y = 1; y < h - 1; y++) {
 		for (let x = 1; x < w - 1; x++) {
 			let sum = 0;
@@ -34,7 +39,7 @@ function convolve3x3(
 					sum += gray * kernel[(ky + 1) * 3 + (kx + 1)];
 				}
 			}
-			const v = Math.min(255, Math.max(0, sum + 128));
+			const v = Math.min(255, Math.max(0, (sum / divisor) * gain + offset));
 			const i = (y * w + x) * 4;
 			out[i] = out[i + 1] = out[i + 2] = v;
 			out[i + 3] = 255;
@@ -76,32 +81,32 @@ function drawTestScene(ctx: CanvasRenderingContext2D, w: number, h: number) {
 
 const FILTERS: { label: string; kernel: number[]; description: string }[] = [
 	{
-		label: "Sobel X — krawędzie pionowe",
+		label: "Sobel X - krawędzie pionowe",
 		kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1],
 		description: "Wykrywa pionowe krawędzie. Duże wartości tam, gdzie intensywność zmienia się poziomo.",
 	},
 	{
-		label: "Sobel Y — krawędzie poziome",
+		label: "Sobel Y - krawędzie poziome",
 		kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1],
 		description: "Wykrywa poziome krawędzie. Duże wartości tam, gdzie intensywność zmienia się pionowo.",
 	},
 	{
 		label: "Wyostrzanie",
 		kernel: [0, -1, 0, -1, 5, -1, 0, -1, 0],
-		description: "Wzmacnia różnice między sąsiednimi pikselami — efekt ostrzejszego obrazu.",
+		description: "Wzmacnia różnice między sąsiednimi pikselami - efekt ostrzejszego obrazu.",
 	},
 	{
 		label: "Rozmycie Gaussowskie",
 		kernel: [1, 2, 1, 2, 4, 2, 1, 2, 1],
-		description: "Uśrednia wartości sąsiednich pikseli ważone rozkładem Gaussowskim — wygładza szum.",
+		description: "Uśrednia wartości sąsiednich pikseli ważone rozkładem Gaussowskim - wygładza szum.",
 	},
 	{
-		label: "Laplacian — detektor plam",
+		label: "Laplacian - detektor plam",
 		kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1],
 		description: "Wykrywa izolowane punkty i krawędzie we wszystkich kierunkach jednocześnie.",
 	},
 	{
-		label: "Emboss — relief",
+		label: "Emboss - relief",
 		kernel: [-2, -1, 0, -1, 1, 1, 0, 1, 2],
 		description: "Tworzy efekt reliefu przez wydobycie ukośnych krawędzi.",
 	},
@@ -132,7 +137,8 @@ export function ConvolutionFiltersDemo() {
 
 		// Overlay filtered result
 		const tmp = document.createElement("canvas");
-		tmp.width = W; tmp.height = H;
+		tmp.width = W;
+		tmp.height = H;
 		const tCtx = tmp.getContext("2d")!;
 		tCtx.putImageData(new ImageData(filtered, W, H), 0, 0);
 		// Tint orange-red
@@ -147,7 +153,9 @@ export function ConvolutionFiltersDemo() {
 		outCtx.globalCompositeOperation = "source-over";
 	}, [filterIdx, alpha]);
 
-	useEffect(() => { apply(); }, [apply]);
+	useEffect(() => {
+		apply();
+	}, [apply]);
 
 	const filter = FILTERS[filterIdx];
 	const km = filter.kernel;
@@ -157,12 +165,7 @@ export function ConvolutionFiltersDemo() {
 			{/* Filter selector */}
 			<div className="flex flex-row flex-wrap gap-2">
 				{FILTERS.map((f, i) => (
-					<Button
-						key={i}
-						size="sm"
-						variant={filterIdx === i ? "default" : "outline"}
-						onClick={() => setFilterIdx(i)}
-					>
+					<Button key={i} size="sm" variant={filterIdx === i ? "default" : "outline"} onClick={() => setFilterIdx(i)}>
 						{f.label.split(" — ")[0]}
 					</Button>
 				))}
@@ -173,12 +176,7 @@ export function ConvolutionFiltersDemo() {
 				<Label className="whitespace-nowrap text-sm">
 					Nakładka: <span className="font-semibold">{alpha}%</span>
 				</Label>
-				<Slider
-					value={[alpha]}
-					onValueChange={(v) => setAlpha(v[0])}
-					min={0} max={100} step={5}
-					className="flex-1"
-				/>
+				<Slider value={[alpha]} onValueChange={(v) => setAlpha(v[0])} min={0} max={100} step={5} className="flex-1" />
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
@@ -204,11 +202,12 @@ export function ConvolutionFiltersDemo() {
 									key={i}
 									className="w-9 h-9 flex items-center justify-center rounded text-white font-semibold"
 									style={{
-										background: v > 0
-											? `rgba(59,130,246,${Math.min(1, Math.abs(v) / 8)})`
-											: v < 0
-											? `rgba(239,68,68,${Math.min(1, Math.abs(v) / 8)})`
-											: "rgba(100,100,100,0.25)",
+										background:
+											v > 0
+												? `rgba(59,130,246,${Math.min(1, Math.abs(v) / 8)})`
+												: v < 0
+													? `rgba(239,68,68,${Math.min(1, Math.abs(v) / 8)})`
+													: "rgba(100,100,100,0.25)",
 									}}
 								>
 									{v}
@@ -228,14 +227,14 @@ export function ConvolutionFiltersDemo() {
 // ---------------------------------------------------------------------------
 
 const FEATURE_KERNELS: { name: string; kernel: number[]; tint: string }[] = [
-	{ name: "Krawędź V",     kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1],          tint: "#3b82f6" },
-	{ name: "Krawędź H",     kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1],          tint: "#ef4444" },
-	{ name: "Ukos ╲",        kernel: [2, 1, 0, 1, 0, -1, 0, -1, -2],          tint: "#10b981" },
-	{ name: "Ukos ╱",        kernel: [0, 1, 2, -1, 0, 1, -2, -1, 0],          tint: "#f59e0b" },
-	{ name: "Laplacian",     kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1],     tint: "#8b5cf6" },
-	{ name: "Rozmycie",      kernel: [1, 2, 1, 2, 4, 2, 1, 2, 1],             tint: "#06b6d4" },
-	{ name: "Gradient ↗",    kernel: [-2, -1, 0, -1, 0, 1, 0, 1, 2],          tint: "#f97316" },
-	{ name: "Wyostrzanie",   kernel: [0, -1, 0, -1, 5, -1, 0, -1, 0],         tint: "#ec4899" },
+	{ name: "Krawędź V", kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1], tint: "#3b82f6" },
+	{ name: "Krawędź H", kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1], tint: "#ef4444" },
+	{ name: "Ukos ╲", kernel: [2, 1, 0, 1, 0, -1, 0, -1, -2], tint: "#10b981" },
+	{ name: "Ukos ╱", kernel: [0, 1, 2, -1, 0, 1, -2, -1, 0], tint: "#f59e0b" },
+	{ name: "Laplacian", kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1], tint: "#8b5cf6" },
+	{ name: "Rozmycie", kernel: [1, 2, 1, 2, 4, 2, 1, 2, 1], tint: "#06b6d4" },
+	{ name: "Gradient ↗", kernel: [-2, -1, 0, -1, 0, 1, 0, 1, 2], tint: "#f97316" },
+	{ name: "Wyostrzanie", kernel: [0, -1, 0, -1, 5, -1, 0, -1, 0], tint: "#ec4899" },
 ];
 
 function renderTinted(
@@ -243,9 +242,10 @@ function renderTinted(
 	srcData: Uint8ClampedArray,
 	kernel: number[],
 	tint: string,
+	gain: number = 1.0,
 ) {
 	const ctx = canvas.getContext("2d")!;
-	const filtered = convolve3x3(srcData, W, H, kernel);
+	const filtered = convolve3x3(srcData, W, H, kernel, gain);
 	ctx.putImageData(new ImageData(filtered, W, H), 0, 0);
 	ctx.globalCompositeOperation = "multiply";
 	ctx.globalAlpha = 0.55;
@@ -296,26 +296,20 @@ export function FeatureMapsDemo() {
 					<span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
 						{selected !== null ? `Powiększenie — ${FEATURE_KERNELS[selected].name}` : "Kliknij mapę, aby powiększyć"}
 					</span>
-					<canvas
-						ref={zoomRef}
-						width={W} height={H}
-						className="rounded-md border border-border w-full h-auto"
-					/>
+					<canvas ref={zoomRef} width={W} height={H} className="rounded-md border border-border w-full h-auto" />
 				</div>
 			</div>
 
 			{/* Thumbnail grid */}
 			<div className="grid grid-cols-4 md:grid-cols-8 gap-2">
 				{FEATURE_KERNELS.map((fk, i) => (
-					<button
-						key={i}
-						title={fk.name}
-						onClick={() => setSelected(i)}
-						className="flex flex-col gap-1 group"
-					>
+					<button key={i} title={fk.name} onClick={() => setSelected(i)} className="flex flex-col gap-1 group">
 						<canvas
-							ref={(el) => { thumbRefs.current[i] = el; }}
-							width={W} height={H}
+							ref={(el) => {
+								thumbRefs.current[i] = el;
+							}}
+							width={W}
+							height={H}
 							className="rounded-md w-full h-auto"
 							style={{
 								border: `2px solid ${selected === i ? fk.tint : "transparent"}`,
@@ -328,7 +322,8 @@ export function FeatureMapsDemo() {
 			</div>
 
 			<p className="text-sm text-muted-foreground">
-				Każda mapa cech odpowiada jednemu filtrowi. Jasne obszary oznaczają silną aktywację — sieć &quot;widzi&quot; tam daną cechę.
+				Każda mapa cech odpowiada jednemu filtrowi. Jasne obszary oznaczają silną aktywację — sieć &quot;widzi&quot; tam
+				daną cechę.
 			</p>
 		</div>
 	);
@@ -340,25 +335,25 @@ export function FeatureMapsDemo() {
 
 const LAYER_DEFS = {
 	conv1: {
-		label: "conv1 — wczesna warstwa",
+		label: "conv1 - wczesna warstwa",
 		description: "Proste cechy: krawędzie i gradienty. Silna odpowiedź wzdłuż konturów obiektów.",
 		color: "#3b82f6",
 		kernels: [
-			{ name: "Krawędź V",  kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1] },
-			{ name: "Krawędź H",  kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1] },
-			{ name: "Ukos ╲",     kernel: [2, 1, 0, 1, 0, -1, 0, -1, -2] },
-			{ name: "Laplacian",  kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1] },
+			{ name: "Krawędź V", kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1] },
+			{ name: "Krawędź H", kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1] },
+			{ name: "Ukos ╲", kernel: [2, 1, 0, 1, 0, -1, 0, -1, -2] },
+			{ name: "Laplacian", kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1] },
 		],
 	},
 	conv2: {
-		label: "conv2 — głębsza warstwa",
+		label: "conv2 - głębsza warstwa",
 		description: "Złożone wzorce: narożniki, skrzyżowania krawędzi. Wejściem są mapy cech conv1.",
 		color: "#10b981",
 		kernels: [
 			{ name: "Narożnik ↘", kernel: [-2, -1, 0, -1, 0, 1, 0, 1, 2] },
 			{ name: "Narożnik ↗", kernel: [0, -1, -2, 1, 0, -1, 2, 1, 0] },
-			{ name: "Pierścień",  kernel: [-1, 2, -1, 2, -4, 2, -1, 2, -1] },
-			{ name: "Krzyż",      kernel: [1, -2, 1, -2, 4, -2, 1, -2, 1] },
+			{ name: "Pierścień", kernel: [1, 1, 1, 1, -8, 1, 1, 1, 1] },
+			{ name: "Krzyż", kernel: [-1, 2, -1, 2, -4, 2, -1, 2, -1] },
 		],
 	},
 } as const;
@@ -388,7 +383,7 @@ export function FeatureHierarchyDemo() {
 		}
 		mapRefs.current.forEach((c, i) => {
 			if (!c || !layer.kernels[i]) return;
-			renderTinted(c, base, layer.kernels[i].kernel, layer.color);
+			renderTinted(c, base, layer.kernels[i].kernel, layer.color, activeLayer === "conv2" ? 3.0 : 1.0);
 		});
 	}, [srcPixels, activeLayer]);
 
@@ -422,8 +417,11 @@ export function FeatureHierarchyDemo() {
 					<div key={i} className="flex flex-col gap-1">
 						<span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{k.name}</span>
 						<canvas
-							ref={(el) => { mapRefs.current[i] = el; }}
-							width={W} height={H}
+							ref={(el) => {
+								mapRefs.current[i] = el;
+							}}
+							width={W}
+							height={H}
 							className="rounded-md border border-border w-full h-auto"
 						/>
 					</div>
@@ -442,7 +440,8 @@ export function FeatureHierarchyDemo() {
 // ---------------------------------------------------------------------------
 
 function drawDigit7(ctx: CanvasRenderingContext2D, offsetX: number) {
-	const cw = 200, ch = 200;
+	const cw = 200,
+		ch = 200;
 	ctx.fillStyle = "#111";
 	ctx.fillRect(0, 0, cw, ch);
 	const cx = cw / 2 + offsetX;
@@ -477,22 +476,31 @@ export function CnnVsMlpDemo() {
 				{/* Digit canvas + slider */}
 				<div className="flex flex-col gap-3">
 					<div className="flex flex-col gap-1">
-						<span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Cyfra &quot;7&quot;</span>
+						<span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+							Cyfra &quot;7&quot;
+						</span>
 						<canvas
 							ref={canvasRef}
-							width={200} height={200}
+							width={200}
+							height={200}
 							className="rounded-md border border-border"
 							style={{ width: 200, height: 200 }}
 						/>
 					</div>
 					<div className="flex items-center gap-4 max-w-xs">
 						<Label className="whitespace-nowrap text-sm">
-							Przesunięcie: <span className="font-semibold">{offset > 0 ? "+" : ""}{offset}px</span>
+							Przesunięcie:{" "}
+							<span className="font-semibold">
+								{offset > 0 ? "+" : ""}
+								{offset}px
+							</span>
 						</Label>
 						<Slider
 							value={[offset]}
 							onValueChange={(v) => setOffset(v[0])}
-							min={-MAX} max={MAX} step={1}
+							min={-MAX}
+							max={MAX}
+							step={1}
 							className="flex-1"
 						/>
 					</div>
@@ -503,28 +511,38 @@ export function CnnVsMlpDemo() {
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="font-medium">MLP</span>
-							<span className="font-mono" style={{ color: "#ef4444" }}>{mlpConf}%</span>
+							<span className="font-mono" style={{ color: "#ef4444" }}>
+								{mlpConf}%
+							</span>
 						</div>
 						<div className="h-3 rounded-full bg-muted overflow-hidden">
-							<div className="h-full rounded-full transition-all duration-150" style={{ width: `${mlpConf}%`, background: "#ef4444" }} />
+							<div
+								className="h-full rounded-full transition-all duration-150"
+								style={{ width: `${mlpConf}%`, background: "#ef4444" }}
+							/>
 						</div>
 					</div>
 					<div className="flex flex-col gap-2">
 						<div className="flex justify-between text-sm">
 							<span className="font-medium">CNN</span>
-							<span className="font-mono" style={{ color: "#10b981" }}>{cnnConf}%</span>
+							<span className="font-mono" style={{ color: "#10b981" }}>
+								{cnnConf}%
+							</span>
 						</div>
 						<div className="h-3 rounded-full bg-muted overflow-hidden">
-							<div className="h-full rounded-full transition-all duration-150" style={{ width: `${cnnConf}%`, background: "#10b981" }} />
+							<div
+								className="h-full rounded-full transition-all duration-150"
+								style={{ width: `${cnnConf}%`, background: "#10b981" }}
+							/>
 						</div>
 					</div>
 
 					<p className="text-sm text-muted-foreground mt-2">
 						{Math.abs(offset) < 15
-							? "Cyfra wyśrodkowana — oba modele klasyfikują poprawnie."
+							? "Cyfra wyśrodkowana - oba modele klasyfikują poprawnie."
 							: Math.abs(offset) < 35
-							? "MLP traci pewność — wzorzec pikseli odbiega od danych treningowych. CNN utrzymuje wysoką pewność dzięki poolingowi."
-							: "Duże przesunięcie — MLP niemal niedziała. CNN wciąż rozpoznaje cyfrę dzięki niezmienności na translację."}
+								? "MLP traci pewność - wzorzec pikseli odbiega od danych treningowych. CNN utrzymuje wysoką pewność dzięki poolingowi."
+								: "Duże przesunięcie - MLP niemal niedziała. CNN wciąż rozpoznaje cyfrę dzięki niezmienności na translację."}
 					</p>
 				</div>
 			</div>
@@ -548,53 +566,97 @@ type GradClass = {
 const GRAD_CLASSES: GradClass[] = [
 	{
 		label: "Cyfra 0",
-		description: "Uwaga skupiona na owalnym konturze — zamknięta pętla charakterystyczna dla zera.",
-		regions: [[0.5, 0.5, 0.35, 1], [0.5, 0.18, 0.12, 0.55], [0.5, 0.82, 0.12, 0.55]],
+		description: "Uwaga skupiona na owalnym konturze - zamknięta pętla charakterystyczna dla zera.",
+		regions: [
+			[0.5, 0.5, 0.35, 1],
+			[0.5, 0.18, 0.12, 0.55],
+			[0.5, 0.82, 0.12, 0.55],
+		],
 		conf: 91,
 		color: "#3b82f6",
 		drawBg: (ctx, w, h) => {
-			ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, w, h);
-			ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 10;
-			ctx.beginPath(); ctx.ellipse(w / 2, h / 2, w * 0.28, h * 0.38, 0, 0, Math.PI * 2); ctx.stroke();
+			ctx.fillStyle = "#0f172a";
+			ctx.fillRect(0, 0, w, h);
+			ctx.strokeStyle = "#e2e8f0";
+			ctx.lineWidth = 10;
+			ctx.beginPath();
+			ctx.ellipse(w / 2, h / 2, w * 0.28, h * 0.38, 0, 0, Math.PI * 2);
+			ctx.stroke();
 		},
 	},
 	{
 		label: "Cyfra 1",
-		description: "Uwaga skupiona na pionowej kresce — długa wąska aktywacja.",
-		regions: [[0.5, 0.5, 0.07, 1], [0.5, 0.28, 0.06, 0.7], [0.5, 0.72, 0.06, 0.7]],
+		description: "Uwaga skupiona na pionowej kresce - długa wąska aktywacja.",
+		regions: [
+			[0.5, 0.5, 0.07, 1],
+			[0.5, 0.28, 0.06, 0.7],
+			[0.5, 0.72, 0.06, 0.7],
+		],
 		conf: 87,
 		color: "#10b981",
 		drawBg: (ctx, w, h) => {
-			ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, w, h);
-			ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 10; ctx.lineCap = "round";
-			ctx.beginPath(); ctx.moveTo(w / 2, h * 0.12); ctx.lineTo(w / 2, h * 0.88); ctx.stroke();
-			ctx.beginPath(); ctx.moveTo(w * 0.38, h * 0.22); ctx.lineTo(w / 2, h * 0.12); ctx.stroke();
+			ctx.fillStyle = "#0f172a";
+			ctx.fillRect(0, 0, w, h);
+			ctx.strokeStyle = "#e2e8f0";
+			ctx.lineWidth = 10;
+			ctx.lineCap = "round";
+			ctx.beginPath();
+			ctx.moveTo(w / 2, h * 0.12);
+			ctx.lineTo(w / 2, h * 0.88);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.moveTo(w * 0.38, h * 0.22);
+			ctx.lineTo(w / 2, h * 0.12);
+			ctx.stroke();
 		},
 	},
 	{
 		label: "Cyfra 7",
-		description: "Uwaga na poziomym pasie u góry i przekątnej — cechy charakterystyczne siódemki.",
-		regions: [[0.5, 0.17, 0.27, 1], [0.63, 0.52, 0.18, 0.8], [0.43, 0.78, 0.13, 0.45]],
+		description: "Uwaga na poziomym pasie u góry i przekątnej - cechy charakterystyczne siódemki.",
+		regions: [
+			[0.5, 0.17, 0.27, 1],
+			[0.63, 0.52, 0.18, 0.8],
+			[0.43, 0.78, 0.13, 0.45],
+		],
 		conf: 79,
 		color: "#f59e0b",
 		drawBg: (ctx, w, h) => {
-			ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, w, h);
-			ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 10; ctx.lineCap = "round";
-			ctx.beginPath(); ctx.moveTo(w * 0.22, h * 0.15); ctx.lineTo(w * 0.78, h * 0.15); ctx.stroke();
-			ctx.beginPath(); ctx.moveTo(w * 0.78, h * 0.15); ctx.lineTo(w * 0.38, h * 0.88); ctx.stroke();
+			ctx.fillStyle = "#0f172a";
+			ctx.fillRect(0, 0, w, h);
+			ctx.strokeStyle = "#e2e8f0";
+			ctx.lineWidth = 10;
+			ctx.lineCap = "round";
+			ctx.beginPath();
+			ctx.moveTo(w * 0.22, h * 0.15);
+			ctx.lineTo(w * 0.78, h * 0.15);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.moveTo(w * 0.78, h * 0.15);
+			ctx.lineTo(w * 0.38, h * 0.88);
+			ctx.stroke();
 		},
 	},
 	{
 		label: "Cyfra 8",
 		description: "Dwa obszary aktywacji odpowiadają górnej i dolnej pętli ósemki.",
-		regions: [[0.5, 0.3, 0.2, 0.9], [0.5, 0.7, 0.23, 1], [0.5, 0.5, 0.08, 0.5]],
+		regions: [
+			[0.5, 0.3, 0.2, 0.9],
+			[0.5, 0.7, 0.23, 1],
+			[0.5, 0.5, 0.08, 0.5],
+		],
 		conf: 83,
 		color: "#8b5cf6",
 		drawBg: (ctx, w, h) => {
-			ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, w, h);
-			ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 8;
-			ctx.beginPath(); ctx.ellipse(w / 2, h * 0.31, w * 0.2, h * 0.2, 0, 0, Math.PI * 2); ctx.stroke();
-			ctx.beginPath(); ctx.ellipse(w / 2, h * 0.69, w * 0.23, h * 0.22, 0, 0, Math.PI * 2); ctx.stroke();
+			ctx.fillStyle = "#0f172a";
+			ctx.fillRect(0, 0, w, h);
+			ctx.strokeStyle = "#e2e8f0";
+			ctx.lineWidth = 8;
+			ctx.beginPath();
+			ctx.ellipse(w / 2, h * 0.31, w * 0.2, h * 0.2, 0, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.ellipse(w / 2, h * 0.69, w * 0.23, h * 0.22, 0, 0, Math.PI * 2);
+			ctx.stroke();
 		},
 	},
 ];
@@ -612,7 +674,8 @@ function renderGradCam(canvas: HTMLCanvasElement, cls: GradClass, heatAlpha: num
 	for (const [cx, cy, r, intensity] of cls.regions) {
 		for (let gy = 0; gy < GR; gy++) {
 			for (let gx = 0; gx < GR; gx++) {
-				const dx = gx / GR - cx, dy = gy / GR - cy;
+				const dx = gx / GR - cx,
+					dy = gy / GR - cy;
 				const d = Math.sqrt(dx * dx + dy * dy);
 				heat[gy * GR + gx] += intensity * Math.max(0, 1 - d / r);
 			}
@@ -623,17 +686,29 @@ function renderGradCam(canvas: HTMLCanvasElement, cls: GradClass, heatAlpha: num
 
 	// Jet colormap RGBA
 	const tmp = document.createElement("canvas");
-	tmp.width = GR; tmp.height = GR;
+	tmp.width = GR;
+	tmp.height = GR;
 	const tCtx = tmp.getContext("2d")!;
 	const id = tCtx.createImageData(GR, GR);
 	for (let i = 0; i < GR * GR; i++) {
 		const v = heat[i];
-		let r = 0, g = 0, b = 0;
-		if (v < 0.25)      { b = 1; g = v / 0.25; }
-		else if (v < 0.5)  { b = 1 - (v - 0.25) / 0.25; g = 1; }
-		else if (v < 0.75) { g = 1; r = (v - 0.5) / 0.25; }
-		else               { r = 1; g = 1 - (v - 0.75) / 0.25; }
-		id.data[i * 4]     = Math.round(r * 255);
+		let r = 0,
+			g = 0,
+			b = 0;
+		if (v < 0.25) {
+			b = 1;
+			g = v / 0.25;
+		} else if (v < 0.5) {
+			b = 1 - (v - 0.25) / 0.25;
+			g = 1;
+		} else if (v < 0.75) {
+			g = 1;
+			r = (v - 0.5) / 0.25;
+		} else {
+			r = 1;
+			g = 1 - (v - 0.75) / 0.25;
+		}
+		id.data[i * 4] = Math.round(r * 255);
 		id.data[i * 4 + 1] = Math.round(g * 255);
 		id.data[i * 4 + 2] = Math.round(b * 255);
 		id.data[i * 4 + 3] = Math.round(v * (heatAlpha / 100) * 255);
@@ -662,12 +737,23 @@ export function GradCamDemo() {
 		const ctx = c.getContext("2d")!;
 		for (let x = 0; x < 120; x++) {
 			const v = x / 120;
-			let r = 0, g = 0, b = 0;
-			if (v < 0.25)      { b = 1; g = v / 0.25; }
-			else if (v < 0.5)  { b = 1 - (v - 0.25) / 0.25; g = 1; }
-			else if (v < 0.75) { g = 1; r = (v - 0.5) / 0.25; }
-			else               { r = 1; g = 1 - (v - 0.75) / 0.25; }
-			ctx.fillStyle = `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+			let r = 0,
+				g = 0,
+				b = 0;
+			if (v < 0.25) {
+				b = 1;
+				g = v / 0.25;
+			} else if (v < 0.5) {
+				b = 1 - (v - 0.25) / 0.25;
+				g = 1;
+			} else if (v < 0.75) {
+				g = 1;
+				r = (v - 0.5) / 0.25;
+			} else {
+				r = 1;
+				g = 1 - (v - 0.75) / 0.25;
+			}
+			ctx.fillStyle = `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`;
 			ctx.fillRect(x, 0, 1, 12);
 		}
 	}, []);
@@ -699,7 +785,9 @@ export function GradCamDemo() {
 				<Slider
 					value={[heatAlpha]}
 					onValueChange={(v) => setHeatAlpha(v[0])}
-					min={10} max={100} step={5}
+					min={10}
+					max={100}
+					step={5}
 					className="flex-1"
 				/>
 			</div>
@@ -712,7 +800,8 @@ export function GradCamDemo() {
 					</span>
 					<canvas
 						ref={canvasRef}
-						width={GW} height={GH}
+						width={GW}
+						height={GH}
 						className="rounded-md border border-border"
 						style={{ width: GW, height: GH }}
 					/>
@@ -735,13 +824,15 @@ export function GradCamDemo() {
 									style={{ width: `${cls.conf}%`, background: cls.color }}
 								/>
 							</div>
-							<span className="font-mono text-sm font-semibold" style={{ color: cls.color }}>{cls.conf}%</span>
+							<span className="font-mono text-sm font-semibold" style={{ color: cls.color }}>
+								{cls.conf}%
+							</span>
 						</div>
 					</div>
 					<p className="text-sm text-muted-foreground">{cls.description}</p>
 					<p className="text-sm text-muted-foreground">
-						Czerwone obszary w heatmapie wskazują miejsca o największym wpływie na decyzję sieci.
-						Grad-CAM pomaga zrozumieć <em>dlaczego</em> model podjął daną decyzję i wykryć błędy w uczeniu.
+						Czerwone obszary w heatmapie wskazują miejsca o największym wpływie na decyzję sieci. Grad-CAM pomaga
+						zrozumieć <em>dlaczego</em> model podjął daną decyzję i wykryć błędy w uczeniu.
 					</p>
 				</div>
 			</div>

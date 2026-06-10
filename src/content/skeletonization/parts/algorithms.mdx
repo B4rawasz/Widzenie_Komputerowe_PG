@@ -8,7 +8,7 @@ import { Skeletonization } from "@/modules/skeletonization/Skeletonization";
 
 Istnieje wiele dróg do uzyskania szkieletu, ale większość z nich można zaklasyfikować do jednej z dwóch kategorii: **ścienianie iteracyjne** lub **transformata odległościowa**.
 
-### 1. Ścienianie (Thinning) — Metoda Zhang-Suena
+### 1. Ścienianie (Thinning) - Metoda Zhang-Suena
 
 Najpopularniejszym podejściem jest iteracyjne usuwanie pikseli z brzegów obiektu, aż zostanie tylko linia o grubości jednego piksela. Działa to jak "obieranie cebuli".
 
@@ -29,8 +29,6 @@ Szkielet tworzą piksele, które są **lokalnymi maksimami** (grzbietami) na tej
 
 > [!NOTE]
 > Transformata odległościowa jest świetna do znajdowania "centrum masy" obiektu, podczas gdy Thinning lepiej zachowuje precyzyjną strukturę połączeń.
-
----
 
 ### Interaktywna wizualizacja
 
