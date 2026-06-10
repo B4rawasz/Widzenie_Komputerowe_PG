@@ -22,7 +22,7 @@ const init = async () => {
 
 ### Dostęp do sprzętu
 
-Aby pobrać obraz, korzystamy z API `navigator.mediaDevices.getUserMedia`. Musimy określić pożądaną rozdzielczość — standardowe $640 \times 480$ jest idealnym komprosem między precyzją a obciążeniem GPU.
+Aby pobrać obraz, korzystamy z API `navigator.mediaDevices.getUserMedia`. Musimy określić pożądaną rozdzielczość - standardowe $640 \times 480$ jest idealnym komprosem między precyzją a obciążeniem GPU.
 
 ```ts
 const stream = await navigator.mediaDevices.getUserMedia({

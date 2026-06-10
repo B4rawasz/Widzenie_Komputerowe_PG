@@ -4,11 +4,11 @@ order: 3
 icon: Play
 ---
 
-Mamy model i mamy wideo, ale system jeszcze "stoi". Potrzebujemy serca aplikacji — pętli, która będzie cyklicznie pobierać klatkę, wysyłać ją do GPU i odbierać wyniki.
+Mamy model i mamy wideo, ale system jeszcze "stoi". Potrzebujemy serca aplikacji, pętli, która będzie cyklicznie pobierać klatkę, wysyłać ją do GPU i odbierać wyniki.
 
 ### Synchronizacja z ekranem (60 FPS)
 
-Nowoczesne monitory odświeżają obraz co ok. 16ms ($1/60$ sekundy). Jeśli nasza pętla będzie działać szybciej lub wolniej, użytkownik odczuje "rwanie" obrazu. Rozwiązaniem jest `requestAnimationFrame` — API, które prosi przeglądarkę o wywołanie funkcji dokładnie przed kolejnym odświeżeniem ekranu.
+Nowoczesne monitory odświeżają obraz co ok. 16ms ($1/60$ sekundy). Jeśli nasza pętla będzie działać szybciej lub wolniej, użytkownik odczuje "rwanie" obrazu. Rozwiązaniem jest `requestAnimationFrame`, API które prosi przeglądarkę o wywołanie funkcji dokładnie przed kolejnym odświeżeniem ekranu.
 
 ```ts showLineNumbers
 const detect = async () => {
@@ -30,7 +30,7 @@ const detect = async () => {
 };
 ```
 
-### Co robi `estimateHands`?
+### Co robi estimateHands?
 
 To najbardziej "pracowita" linia kodu. Pod maską wykonuje ona:
 1.  **Konwersję klatki**: Zmianę pikseli z `<video>` na tensory.

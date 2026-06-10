@@ -10,7 +10,7 @@ Aby komputer mógł "widzieć" w czasie rzeczywistym w przeglądarce, musimy zbu
 
 Nasz system opiera się na czterech filarach:
 
-1.  **tfjs-core**: Silnik matematyczny TensorFlow.js. Zarządza tensorami — wielowymiarowymi macierzami, które dla AI są tym samym, czym dla nas obrazy.
+1.  **tfjs-core**: Silnik matematyczny TensorFlow.js. Zarządza tensorami - wielowymiarowymi macierzami, które dla AI są tym samym, czym dla nas obrazy.
 2.  **tfjs-backend-webgl**: Akcelerator sprzętowy. Bez niego detekcja dłoni działałaby jak pokaz slajdów. WebGL pozwala przeglądarce rozmawiać bezpośrednio z kartą graficzną.
 3.  **MediaPipe Hands**: Gotowa, wytrenowana przez Google sieć neuronowa. To ona "wie", jak wygląda ludzka dłoń.
 4.  **hand-pose-detection**: Warstwa sterująca (API), która łączy powyższe elementy w jedną, łatwą w użyciu funkcję.
@@ -54,4 +54,4 @@ Po pomyślnej analizie klatki, system zwraca tablicę obiektów, z których każ
 - **Handedness**: Informacja, czy wykryto lewą, czy prawą dłoń.
 
 > [!NOTE]
-> Współrzędna $Z$ jest kluczem do nowoczesnych interfejsów — pozwala nam wykryć, czy dłoń wykonuje gest w stronę ekranu, czy od niego.
+> Współrzędna $Z$ jest kluczem do nowoczesnych interfejsów. Pozwala nam wykryć, czy dłoń wykonuje gest w stronę ekranu, czy od niego.
