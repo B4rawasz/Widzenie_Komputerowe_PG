@@ -208,6 +208,33 @@
 		h4 {
 			@apply leading-[normal];
 		}
+		ol {
+			@apply list-decimal pl-6 my-3;
+		}
+		ul {
+			@apply list-disc pl-6 my-3;
+		}
+		ol ul {
+			@apply list-disc pl-6 my-0;
+		}
+		ul ol {
+			@apply list-decimal pl-6 my-0;
+		}
+		ol ol {
+			@apply list-decimal pl-6 my-0;
+		}
+		ul ul {
+			@apply list-disc pl-6 my-0;
+		}
+		li {
+			@apply my-2;
+			&:first-child {
+				@apply mt-0;
+			}
+			&:last-child {
+				@apply mb-0;
+			}
+		}
 
 		code[data-theme*=" "],
 		code[data-theme*=" "] span {
