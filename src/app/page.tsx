@@ -25,11 +25,12 @@ export default function Home() {
 							poziomie.
 						</span>
 						<span>
-							Ta sekcja wprowadza do anatomii cyfrowego obrazu. Odkryjesz, jak obrazy są reprezentowane jako macierze pikseli i jak proste operacje matematyczne wydobywają z nich fundamentalne cechy.
+							Ta sekcja wprowadza do anatomii cyfrowego obrazu. Odkryjesz, jak obrazy są reprezentowane jako macierze
+							pikseli i jak proste operacje matematyczne wydobywają z nich fundamentalne cechy.
 						</span>
 						<SectionBadges items={["Wykrywanie krawędzi", "Szkieletyzacja", "Transformacja Hougha"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/600x400.png"} alt="Fundamenty" />
+					<SectionImage src={"/covers/cov2.png"} alt="Fundamenty" />
 				</Section>
 
 				<Section reverse>
@@ -37,11 +38,12 @@ export default function Home() {
 						<SectionTitle>Klasyfikacja</SectionTitle>
 						<span>Klasyfikacja to proces przypisywania obiektów do predefiniowanych kategorii.</span>
 						<span>
-							Poznasz podejścia: od metod statystycznych, przez minimalnoodległościowe, aż po zaawansowane granice liniowe i łamane, badając jak kształt granicy decyzyjnej wpływa na skuteczność modelu.
+							Poznasz podejścia: od metod statystycznych, przez minimalnoodległościowe, aż po zaawansowane granice
+							liniowe i łamane, badając jak kształt granicy decyzyjnej wpływa na skuteczność modelu.
 						</span>
 						<SectionBadges items={["Klasyfikatory", "Perceptron", "Uczenie maszynowe"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/600x400.png"} alt="Klasyfikacja" />
+					<SectionImage src={"/covers/cov5.png"} alt="Klasyfikacja" />
 				</Section>
 
 				<Section>
@@ -49,11 +51,12 @@ export default function Home() {
 						<SectionTitle>Sieci Neuronowe</SectionTitle>
 						<span>Od pojedynczego perceptronu do wielowarstwowych struktur MLP.</span>
 						<span>
-							Poznasz architekturę sieci, sposoby wizualizacji ich "wiedzy", działanie filtrów konwolucyjnych (CNN) oraz mechanizmy podejmowania ostatecznych decyzji przez warstwę wyjściową.
+							Poznasz architekturę sieci, sposoby wizualizacji ich "wiedzy", działanie filtrów konwolucyjnych (CNN) oraz
+							mechanizmy podejmowania ostatecznych decyzji przez warstwę wyjściową.
 						</span>
 						<SectionBadges items={["Sieci neuronowe", "CNN", "Deep Learning"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/600x400.png"} alt="Sieci Neuronowe" />
+					<SectionImage src={"/covers/cov6.png"} alt="Sieci Neuronowe" />
 				</Section>
 
 				<Section reverse>
@@ -61,11 +64,12 @@ export default function Home() {
 						<SectionTitle>Detekcja Obiektów</SectionTitle>
 						<span>Detekcja obiektów to połączenie klasyfikacji i lokalizacji.</span>
 						<span>
-							Dowiesz się, jak algorytmy wyznaczają granice przedmiotów (Bounding Boxes), jak mierzyć ich dokładność (IoU) oraz jak usuwać powtarzające się predykcje za pomocą Non-Max Suppression.
+							Dowiesz się, jak algorytmy wyznaczają granice przedmiotów (Bounding Boxes), jak mierzyć ich dokładność
+							(IoU) oraz jak usuwać powtarzające się predykcje za pomocą Non-Max Suppression.
 						</span>
 						<SectionBadges items={["Detekcja obiektów", "Bounding Boxes", "NMS"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/600x400.png"} alt="Detekcja Obiektów" />
+					<SectionImage src={"/covers/cov8.png"} alt="Detekcja Obiektów" />
 				</Section>
 
 				<Section>
@@ -73,11 +77,12 @@ export default function Home() {
 						<SectionTitle>Aplikacje Zaawansowane</SectionTitle>
 						<span>Studium przypadku budowy kompletnej aplikacji Computer Vision w przeglądarce.</span>
 						<span>
-							Zastosujemy zdobytą wiedzę w praktyce: rozpoznawanie i analiza dłoni w czasie rzeczywistym, wykorzystując akcelerację GPU i zaawansowaną geometrię 3D.
+							Zastosujemy zdobytą wiedzę w praktyce: rozpoznawanie i analiza dłoni w czasie rzeczywistym, wykorzystując
+							akcelerację GPU i zaawansowaną geometrię 3D.
 						</span>
 						<SectionBadges items={["Rozpoznawanie dłoni", "Interakcja 3D", "Estymacja pozy"]} />
 					</SectionContent>
-					<SectionImage src={"https://placehold.co/600x400.png"} alt="Aplikacje" />
+					<SectionImage src={"/covers/cov9.png"} alt="Aplikacje" />
 				</Section>
 			</section>
 		</>
