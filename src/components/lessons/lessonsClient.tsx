@@ -84,7 +84,11 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 				>
 					{lesson.coverImage && (
 						<div>
-							<img src={lesson.coverImage} alt={lesson.title} className="w-full mask-clip-border" />
+							<img
+								src={lesson.coverImage}
+								alt={lesson.title}
+								className="w-full mask-clip-border border-t border-x rounded-t-xl"
+							/>
 						</div>
 					)}
 					<div className="flex flex-col gap-2 px-6 grow">
@@ -96,7 +100,7 @@ export default function LessonsClient({ lessons }: { lessons: AllLessonsMetadata
 						</div>
 						<h3>{lesson.title}</h3>
 						<div className="text-sm grow">{lesson.description}</div>
-						<LessonProgress lessonData={lessons.find(l => l.lesson.slug === lesson.slug)} />
+						<LessonProgress lessonData={lessons.find((l) => l.lesson.slug === lesson.slug)} />
 						<Button asChild className="w-full mt-4 mb-6">
 							<Link href={`/lessons/${lesson.slug}`}>Rozpocznij lekcję</Link>
 						</Button>
